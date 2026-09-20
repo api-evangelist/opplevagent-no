@@ -1,0 +1,94 @@
+overlay: 1.0.0
+info:
+  title: API Evangelist enhancements for the Opplevagent API
+  version: 1.0.0
+extends: ../openapi/opplevagent-no-openapi.yml
+x-generated: '2026-09-19'
+x-method: derived
+x-source: >-
+  Derived from openapi/opplevagent-no-openapi.yml plus the searched artifacts in this repo (llms.txt, the A2A agent
+  card, the live MCP tools/list). Captures API Evangelist annotations without mutating the provider's contract.
+actions:
+- target: $.info
+  description: Link the provider's own machine-readable discovery surface from the contract.
+  update:
+    x-llms-txt: https://opplevagent.no/llms.txt
+    x-agent-card: https://opplevagent.no/.well-known/agent-card.json
+    x-mcp-endpoint: https://opplevagent.no/mcp
+    x-mcp-server-card: https://opplevagent.no/.well-known/mcp/server-card.json
+    x-mcp-package: https://www.npmjs.com/package/opplevagent-mcp
+    x-source-repository: https://github.com/slookisen/lokal
+    x-provenance-page: https://opplevagent.no/proveniens
+- target: $.info
+  description: >-
+    Record operations the provider documents in llms.txt but does not declare in this contract, so a reader knows
+    the spec under-describes the surface rather than assuming the operations do not exist.
+  update:
+    x-apievangelist-undeclared-operations:
+    - POST /api/opplevelser/book (booking request; REST twin of the MCP tool book_gardssalg)
+    - POST /api/keys (issue optional consumer key)
+    - POST /api/keys/revoke
+    - POST /api/keys/erase
+- target: $.components
+  description: >-
+    Declare the optional consumer key the agent card and llms.txt document. It is never required; it raises the
+    rate ceiling (300 -> 900 per 900 s on REST). Added here, not to the original, because the provider's spec omits it.
+  update:
+    securitySchemes:
+      consumerApiKey:
+        type: apiKey
+        in: header
+        name: X-API-Key
+        description: Optional, free, no account. Obtain via POST /api/keys. Anonymous calls are accepted on every operation.
+- target: $
+  description: Declare tags so the seven operations group by purpose.
+  update:
+    tags:
+    - name: Discovery
+      description: Read-only intent discovery over verified Norwegian experiences and gårdssalg producers.
+    - name: Agent Surface
+      description: Operations that carry or describe the A2A and LLM discovery documents.
+- target: $.paths['/api/opplevelser/discover'].get
+  update: {tags: [Discovery]}
+- target: $.paths['/api/opplevelser/categories'].get
+  update: {tags: [Discovery]}
+- target: $.paths['/api/opplevelser/{id}'].get
+  update: {tags: [Discovery]}
+- target: $.paths['/a2a'].get
+  update: {tags: [Agent Surface]}
+- target: $.paths['/a2a'].post
+  update: {tags: [Agent Surface]}
+- target: $.paths['/.well-known/agent-card.json'].get
+  update: {tags: [Agent Surface]}
+- target: $.paths['/llms.txt'].get
+  update: {tags: [Agent Surface]}
+- target: $.paths['/api/opplevelser/discover'].get.responses['400']
+  description: Document the observed 400 body (probed 2026-09-19 with lat but no lng).
+  update:
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            error: {type: string, example: Invalid query}
+            details:
+              type: array
+              items:
+                type: object
+                properties:
+                  code: {type: string}
+                  path: {type: array, items: {type: string}}
+                  message: {type: string}
+- target: $.paths['/api/opplevelser/{id}'].get.responses['404']
+  description: Document the observed 404 body (probed 2026-09-19 with a nil UUID).
+  update:
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            error: {type: string, example: Not found}
+- target: $.paths['/api/opplevelser/discover'].get
+  description: Rate-limit signalling observed live on this operation.
+  update:
+    x-rate-limit: {limit: 300, window_seconds: 900, headers: [RateLimit-Policy, RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset], keyed_limit: 900}

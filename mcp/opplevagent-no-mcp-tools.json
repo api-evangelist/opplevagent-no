@@ -1,0 +1,316 @@
+{
+  "tools": [
+    {
+      "name": "discover_experiences",
+      "title": "Discover Norwegian experiences",
+      "description": "Search the opplevagent.no curated marketplace of Norwegian experiences and activities. Filtrer på fylke (county), kategori, vær, sesong, innendørs/utendørs, gruppestørrelse, pris og varighet. / Filter by county, category, weather, season, indoor/outdoor, group size, price, and duration. Also supports near-me search via lat/lng (+ optional radius_km): when given, results include a rounded distance_km and a geo_precision flag ('address' = exact, 'kommune' = approximate municipality centroid) and are sorted nearest-first. Returns title, category, location (fylke/kommune), description, and booking URL if available. Only verified experiences from active providers (Brreg-checked) are returned. Examples: 'hva kan vi finne på i Troms om vinteren?', 'outdoor activities in Oslo for 4 people', 'experiences within 50km of lat 69.65 / lng 18.95'.",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "fylke": {
+            "description": "Norwegian county (fylke). Examples: 'Oslo', 'Vestland', 'Troms', 'Rogaland'",
+            "type": "string"
+          },
+          "kommune": {
+            "description": "Norwegian municipality (kommune). Examples: 'Tromsø', 'Bergen', 'Stavanger'",
+            "type": "string"
+          },
+          "category": {
+            "description": "Experience category slug. Examples: 'natur_friluft', 'dyreliv_safari', 'mat_drikke', 'vinter'",
+            "type": "string"
+          },
+          "weather": {
+            "description": "Weather suitability filter. 'rain'/'snow' prefers indoor + weather-independent experiences. Examples: 'rain', 'clear'",
+            "type": "string",
+            "enum": [
+              "rain",
+              "snow",
+              "clear",
+              "any"
+            ]
+          },
+          "season": {
+            "description": "Season filter. Examples: 'summer', 'winter', 'spring', 'autumn'",
+            "type": "string"
+          },
+          "indoor_outdoor": {
+            "description": "Indoor/outdoor preference. Examples: 'indoor', 'outdoor', 'both'",
+            "type": "string",
+            "enum": [
+              "indoor",
+              "outdoor",
+              "both"
+            ]
+          },
+          "group_size": {
+            "description": "Number of people in the group. Used to filter experiences by min/max group capacity. Example: 4",
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "age": {
+            "description": "Age of the youngest participant. Filters out experiences with a minimum-age requirement above this. Example: 8",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "max_price": {
+            "description": "Maximum price per person in Norwegian kroner (NOK). Example: 500",
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "duration_max": {
+            "description": "Maximum duration in minutes. Example: 120 (2 hours)",
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "language": {
+            "description": "Required language for the experience. Examples: 'no', 'en'",
+            "type": "string"
+          },
+          "lat": {
+            "description": "Origin latitude for a near-me search (decimal degrees). Must be given together with lng. Example: 69.65 (Tromsø)",
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90
+          },
+          "lng": {
+            "description": "Origin longitude for a near-me search (decimal degrees). Must be given together with lat. Example: 18.95 (Tromsø)",
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180
+          },
+          "radius_km": {
+            "description": "Max distance from lat/lng in kilometers. Only applies when lat/lng are given. Example: 50",
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "maximum": 5000
+          },
+          "sort": {
+            "description": "'distance' — sort results ascending by distance from lat/lng. Already the default whenever lat/lng are given; this makes the request explicit.",
+            "type": "string",
+            "enum": [
+              "distance"
+            ]
+          },
+          "limit": {
+            "default": 20,
+            "description": "Max results (default 20, max 50)",
+            "type": "number",
+            "minimum": 1,
+            "maximum": 50
+          }
+        }
+      },
+      "annotations": {
+        "title": "Discover Norwegian experiences",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "_meta": {
+        "openai/outputTemplate": "ui://opplevagent/experiences-list"
+      }
+    },
+    {
+      "name": "list_experience_categories",
+      "title": "List Norwegian experience categories",
+      "description": "List all experience categories available on opplevagent.no, along with the number of verified experiences in each category. Henter alle kategorier med antall verifiserte opplevelser. Use this to understand what kinds of experiences are available before calling discover_experiences with a specific category filter. Example question: 'hvilke typer opplevelser finnes i Norge?', 'what categories are available?'.",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {}
+      },
+      "annotations": {
+        "title": "List experience categories",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "get_experience",
+      "title": "Get full details for a Norwegian experience",
+      "description": "Fetch complete details for a single experience from opplevagent.no by its UUID. Henter fullstendig informasjon om en opplevelse via UUID. Returns title, full description, category, location (fylke/kommune/meeting point), indoor/outdoor, season, weather suitability, group size limits, age suitability, price, duration, languages, booking URL, and booking type. Obtain the UUID from discover_experiences results. Example: id 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'.",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "UUID of the experience to fetch. Example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "annotations": {
+        "title": "Get experience details",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "_meta": {
+        "openai/outputTemplate": "ui://opplevagent/experience-detail"
+      }
+    },
+    {
+      "name": "discover_gardssalg",
+      "title": "Discover Norwegian farm-sale drink producers (gårdssalg)",
+      "description": "Search opplevagent.no's gårdssalg (farm-sale) vertical — Brreg-registered Norwegian drink producers (bryggeri/cideri/vingård/destilleri/gårdskafé/mjød/seltzeri) selling directly from the farm. Finn norske gårdssalg-produsenter (drikkeprodusenter som selger direkte fra gården) etter fylke, kommune og produsenttype. / Filter by county (fylke), municipality (kommune), and producer type. Also supports near-me search via lat/lng (+ optional radius_km): when given, results include a rounded distance_km and are sorted nearest-first, and rows with no geocoded location are excluded (never a fabricated distance). Returns id (the provider_id for book_gardssalg), name, location, producer type, and an honest booking status (live direct booking vs. a dark-launch 'coming soon' note — never overclaims booking availability). To look up ONE specific producer by name (e.g. when the guest says 'book hos Fjordgard Bryggeri'), pass `query`. Examples: 'gårdssalg i Vestland', 'cideri near lat 60.4 / lng 5.3', 'bryggeri med booking', query: 'Fjordgard Bryggeri'.",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "fylke": {
+            "description": "Norwegian county (fylke) of the producer. Examples: 'Oslo', 'Vestland', 'Troms', 'Rogaland'",
+            "type": "string"
+          },
+          "kommune": {
+            "description": "Norwegian municipality (kommune) of the producer. Examples: 'Tromsø', 'Bergen', 'Stavanger'",
+            "type": "string"
+          },
+          "producer_type": {
+            "description": "Type of drink producer — one of the six canonical drink venue kinds: 'bryggeri' (brewery), 'cideri' (cidery), 'vingård' (winery), 'destilleri' (distillery), 'gårdskafé' (farm café), 'mjød'/'mjøderi' (meadery). 'seltzeri' also occurs in the data.",
+            "type": "string"
+          },
+          "query": {
+            "description": "Free-text lookup of a specific producer by name and/or place, e.g. 'Fjordgard Bryggeri', 'Egge gård', 'sideri Hardanger'. Every word must match the producer's name, URL slug, place (poststed) or municipality; exact name matches rank first. Use this to get the `id` (provider_id) for book_gardssalg when the guest names a producer.",
+            "type": "string",
+            "maxLength": 200
+          },
+          "booking_live": {
+            "description": "When true, only return producers that currently accept direct bookings. Omit to include producers regardless of booking status.",
+            "type": "boolean"
+          },
+          "lat": {
+            "description": "Origin latitude for a near-me search (decimal degrees). Must be given together with lng. Example: 69.65 (Tromsø)",
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90
+          },
+          "lng": {
+            "description": "Origin longitude for a near-me search (decimal degrees). Must be given together with lat. Example: 18.95 (Tromsø)",
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180
+          },
+          "radius_km": {
+            "description": "Max distance from lat/lng in kilometers. Only applies when lat/lng are given. Example: 50",
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "maximum": 5000
+          },
+          "limit": {
+            "default": 20,
+            "description": "Max results (default 20, max 50)",
+            "type": "number",
+            "minimum": 1,
+            "maximum": 50
+          }
+        }
+      },
+      "annotations": {
+        "title": "Discover gårdssalg producers",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "book_gardssalg",
+      "title": "Request a gårdssalg booking (pending — email confirmation required)",
+      "description": "Submit a booking REQUEST for a Norwegian gårdssalg (farm-sale) producer discovered via discover_gardssalg. Send inn en reservasjonsforespørsel for et gårdssalg-besøk. IMPORTANT: this NEVER creates a confirmed booking — it creates a PENDING request, exactly like the producer's own website form. The PRODUCER reviews the request and responds (confirms, proposes another time, or declines); guest_email only receives a read-only status link, never anything that can finalize the booking. No payment is involved (pickup/visit, pay on arrival, as today). Only producers with an active booking status (see discover_gardssalg's booking.live field) can be booked — a paused/not-yet-onboarded producer is rejected with a clear message, never a silent failure. VIKTIG: oppretter ALDRI en bekreftet booking — kun en avventende forespørsel; produsenten mottar forespørselen og svarer (bekrefter, foreslår nytt tidspunkt eller avslår). ONE-SENTENCE FLOW («book et møte hos X fredag 20. oktober kl. 10 for 4 personer»): call this ONCE with provider_query='X' (the producer's name — no discover_gardssalg round-trip needed), slot_at, party_size, guest_name, guest_email and requested_weekday='fredag'. The tool resolves X to exactly one producer (or returns candidates / not-found with NO booking created), checks that the date really is a Friday (or returns weekday_mismatch:true with the nearest Fridays, NO booking created), then submits the request and notifies the producer by email. guest_name and guest_email are the HUMAN guest's own — ask the guest for them if you do not have them; never invent or reuse someone else's. Required: provider_id OR provider_query, slot_at (requested date/time, 'YYYY-MM-DDTHH:MM' Europe/Oslo), party_size, guest_name, guest_email. Optional: requested_weekday, experience_id, guest_phone, notes, confirm_outside_hours. The requested slot_at is ALWAYS hard-rejected if it's in the past or too far ahead. If the producer has stated opening hours and slot_at falls outside them, this returns outside_hours:true (not an error) instead of creating the booking — retry once with confirm_outside_hours:true if the exact requested time should be kept anyway. On success the response carries the resolved producer (provider.navn) and slot_at_local (e.g. 'fredag 23. oktober 2026 kl. 10:00') — read both back to the guest. Example: provider_query 'Fjordgard Bryggeri', slot_at '2026-10-23T10:00', requested_weekday 'fredag', party_size 4, guest_name 'Kari Nordmann', guest_email 'kari@example.no'.",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "provider_id": {
+            "description": "The gårdssalg producer's id — the `id` field of a discover_gardssalg result (NOT the profile slug). Example: '3f1b2c4d-...'. Either provider_id or provider_query is required; provider_id wins when both are given.",
+            "type": "string"
+          },
+          "provider_query": {
+            "description": "Alternative to provider_id: the producer's name as the guest said it, optionally with a place, e.g. 'Fjordgard Bryggeri' or 'Egge gård Steinkjer'. Resolved to exactly ONE producer; if several match, the tool returns the candidates (no booking created) so you can ask the guest which one; if none match, it says so.",
+            "type": "string",
+            "maxLength": 200
+          },
+          "requested_weekday": {
+            "description": "Safety check — the weekday the guest actually said, e.g. 'fredag' or 'Friday'. If slot_at does not fall on that weekday (Europe/Oslo) the tool returns weekday_mismatch:true with the nearest dates that do, instead of booking the wrong day. Always pass it when the guest named a weekday.",
+            "type": "string",
+            "maxLength": 20
+          },
+          "experience_id": {
+            "description": "Optional experience UUID if this booking is for a specific listed experience rather than a general gårdssalg visit.",
+            "type": "string"
+          },
+          "slot_at": {
+            "type": "string",
+            "description": "Requested visit date/time, local (Europe/Oslo), format 'YYYY-MM-DDTHH:MM'. Example: '2026-08-15T13:00'. This is a REQUEST — the producer may confirm, suggest another time, or decline."
+          },
+          "party_size": {
+            "type": "number",
+            "description": "Number of people in the group (1-50). Example: 4"
+          },
+          "guest_name": {
+            "type": "string",
+            "description": "Full name of the person the reservation is for. Example: 'Kari Nordmann'"
+          },
+          "guest_email": {
+            "type": "string",
+            "description": "Guest's email address — REQUIRED. Receives a confirmation-of-request email plus a read-only status link; the booking stays pending until the PRODUCER responds (confirms, proposes another time, or declines) — the guest's link cannot finalize anything. Example: 'kari@example.no'"
+          },
+          "guest_phone": {
+            "description": "Optional guest phone number.",
+            "type": "string"
+          },
+          "notes": {
+            "description": "Optional free-text note to the producer (e.g. dietary needs, arrival details).",
+            "type": "string"
+          },
+          "confirm_outside_hours": {
+            "description": "Set to true only when RETRYING after a previous call to this tool returned outside_hours:true and the requested time should be kept anyway, despite falling outside the producer's stated opening hours. Omit on a first attempt.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "slot_at",
+          "party_size",
+          "guest_name",
+          "guest_email"
+        ]
+      },
+      "annotations": {
+        "title": "Request a gårdssalg booking",
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    }
+  ]
+}

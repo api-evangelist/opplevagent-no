@@ -1,0 +1,62 @@
+generated: '2026-09-19'
+method: searched
+source: https://opplevagent.no/llms.txt
+docs: https://opplevagent.no/llms.txt
+spec: openapi/opplevagent-no-openapi.yml
+summary:
+  types:
+  - none
+  - apiKey
+  required: false
+  transport: X-API-Key request header, HTTPS only
+  note: >-
+    The OpenAPI declares no securitySchemes and no security requirement, and states "All read endpoints are public;
+    no authentication required." The provider's llms.txt, agent card (securitySchemes.consumerApiKey) and MCP server
+    card all say the same: every REST, MCP and A2A call works anonymously. An optional, free consumer key exists
+    purely as an identity/rate-tier signal. derive-authentication.py produced no profile because the spec is
+    scheme-less; this file records the documented model instead.
+schemes:
+- name: anonymous
+  type: none
+  description: Default. Every documented operation, MCP tool and A2A skill accepts unauthenticated calls.
+  sources:
+  - openapi/opplevagent-no-openapi.yml (info.description)
+  - https://opplevagent.no/.well-known/mcp/server-card.json (authentication.schemes [none])
+  - https://opplevagent.no/.well-known/agent-card.json (authentication.schemes [none])
+- name: consumerApiKey
+  type: apiKey
+  in: header
+  header: X-API-Key
+  required: false
+  description: >-
+    Voluntary, free identity key for AI agents. No login, account or identity check — issued instantly by POST
+    /api/keys. Sending it raises the rate ceiling roughly 3x (200 -> 600 per 900 s on /a2a and /mcp, 300 -> 900 on
+    REST) and records calls in an aggregated per-key usage ledger (endpoint/tool name and date only, never content
+    or arguments).
+  sources:
+  - https://opplevagent.no/llms.txt ("Frivillig API-nøkkel (forbruker-identitet)")
+  - https://opplevagent.no/.well-known/agent-card.json (securitySchemes.consumerApiKey)
+credentials:
+- id: consumer-key
+  header: 'X-API-Key: <key>'
+  prefix: null
+  use: Optional higher rate-limit tier on any REST, MCP or A2A call
+  issued_by: >-
+    POST https://opplevagent.no/api/keys — optional JSON body {"label": "...", "contact_email": "..."}; the
+    response contains `key`, shown once and not retrievable again
+  lifecycle:
+    revoke: POST https://opplevagent.no/api/keys/revoke — stops the key, retains history
+    erase: POST https://opplevagent.no/api/keys/erase — GDPR deletion of label and e-mail
+    body: '{"key": "..."} or the key as the X-API-Key header'
+  note: >-
+    The key lifecycle endpoints are documented in llms.txt but are not declared in the OpenAPI (see
+    overlays/opplevagent-no-api-overlay.yaml). The agent card warns that the same header name may elsewhere denote
+    a producer/write key, but opplevagent.no has no write API behind it, so here X-API-Key means only this key.
+oauth: null
+scopes: null
+mcp_auth:
+  scheme: none
+  session: mcp-session-id header issued on initialize and required on every later call (a transport session, not a credential)
+a2a_auth:
+  scheme: none
+  card_declares: authentication.schemes [none]; securitySchemes.consumerApiKey optional

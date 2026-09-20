@@ -1,0 +1,16 @@
+{
+  "resources": [
+    {
+      "uri": "ui://opplevagent/experiences-list",
+      "name": "experiences-list",
+      "description": "ChatGPT inline card list for discover_experiences results — renders each experience as a clickable card with title, category, location, price, and duration.",
+      "mimeType": "text/html"
+    },
+    {
+      "uri": "ui://opplevagent/experience-detail",
+      "name": "experience-detail",
+      "description": "ChatGPT inline card for get_experience results — renders full details for a single experience with title, meta badges, description, and a booking CTA.",
+      "mimeType": "text/html"
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+generated: '2026-09-19'
+method: searched
+source: https://opplevagent.no/guide-opplevelser-mcp
+docs: https://opplevagent.no/llms.txt
+plan_count: 1
+currency: NOK
+model: Free, anonymous access; an optional free identity key unlocks a higher rate-limit tier
+pricing_page: null
+plans:
+- id: free
+  name: Open access
+  price: 0
+  currency: NOK
+  period: null
+  description: >-
+    Every search/read endpoint (REST, MCP, A2A) is open with no key, no account and no payment. The MCP guide FAQ
+    answers "Koster det noe å bruke MCP-serveren? Nei — serveren er gratis og åpen kildekode." llms.txt repeats that
+    the key is "NOT a login or a requirement to use the service."
+  included:
+  - REST discovery API, MCP server and A2A endpoint
+  - 300 requests per 900 s on REST, 200 per 900 s on /a2a and /mcp (anonymous)
+  - 600 / 900 per 900 s with the optional free X-API-Key
+  limits: rate-limits/opplevagent-no-rate-limits.yml
+  note: >-
+    The keyed tier is a rate-limit tier, not a paid plan — the key is issued instantly by POST /api/keys with no
+    identity check. There is no pricing page, no enterprise tier and no paid product; producers claim their profile
+    for free (https://opplevagent.no/for-tilbydere). Booking is a request relayed to the producer with no payment.

@@ -1,0 +1,83 @@
+generated: '2026-09-19'
+method: derived
+source: >-
+  Derived by aligning the LIVE MCP tools/list (mcp/opplevagent-no-mcp-tools.json, anonymous, 2026-09-19) and the
+  A2A agent card skills (a2a/opplevagent-no-agent-card.json) with the OpenAPI at openapi/opplevagent-no-openapi.yml
+  (7 operations, fetched from https://opplevagent.no/openapi.json the same day).
+purpose: >-
+  Bind each agent-facing tool to the REST operation that backs it so the tool inherits the operation's real
+  parameter contract. Opplevagent's REST, MCP and A2A surfaces are projections of one discovery core, with one
+  MCP-only write flow and four REST-only discovery/meta operations.
+surfaces:
+  rest_openapi: openapi/opplevagent-no-openapi.yml
+  mcp: https://opplevagent.no/mcp
+  mcp_gated: false
+  a2a: https://opplevagent.no/a2a
+  graphql: null
+crosswalk:
+- tool: discover_experiences
+  category: discovery
+  rest: [discoverExperiences]
+  binding: rest
+  confidence: high
+  note: >-
+    Parameter-for-parameter match with GET /api/opplevelser/discover (fylke, kommune, category, weather, season,
+    indoor_outdoor, group_size, age, max_price, duration_max, language, lat, lng, radius_km, sort, limit). One
+    divergence: the MCP tool caps limit at 50 while the REST parameter allows 100.
+- tool: list_experience_categories
+  category: discovery
+  rest: [listExperienceCategories]
+  binding: rest
+  confidence: high
+- tool: get_experience
+  category: lookup
+  rest: [getExperience]
+  binding: rest
+  confidence: high
+- tool: discover_gardssalg
+  category: discovery
+  rest: [discoverExperiences]
+  binding: rest
+  confidence: high
+  note: >-
+    Backed by the same discover operation with category=gardssalg_smaking, which the OpenAPI documents as routing
+    to the gårdssalg producer vertical and returning GardssalgProducer rows. The tool's producer_type, booking_live,
+    lat/lng/radius_km and limit map directly; the tool's `query` parameter is the REST `q` parameter.
+a2a_skills:
+- skill: opplevelser_discover
+  rest: [discoverExperiences]
+  mcp: discover_experiences
+  confidence: high
+- skill: opplevelser_info
+  rest: [getExperience]
+  mcp: get_experience
+  confidence: high
+- skill: opplevelser_categories
+  rest: [listExperienceCategories]
+  mcp: list_experience_categories
+  confidence: high
+mcp_only:
+- tool: book_gardssalg
+  reason: >-
+    No REST operation in the published OpenAPI. llms.txt documents a REST twin, POST /api/opplevelser/book with the
+    same JSON fields, and the GardssalgProducer schema description references it, but the path is not declared in
+    the contract — a documentation-vs-contract gap on the provider's side, not a missing tool. Not mapped because
+    the operation does not exist in the spec.
+rest_only:
+- capability: agent-surface discovery
+  operations: [getExperiencesA2ACard, experiencesA2AJsonRpc, getExperiencesAgentCardWellKnown, getExperiencesLlmsTxt]
+  note: >-
+    Meta operations that describe or carry the other surfaces (the A2A card, the A2A JSON-RPC endpoint, llms.txt).
+    They have no MCP tool by design.
+undeclared_in_contract:
+- POST /api/opplevelser/book — documented in llms.txt
+- POST /api/keys, POST /api/keys/revoke, POST /api/keys/erase — the optional consumer-key lifecycle, documented in llms.txt and the agent card
+coverage:
+  mcp_tools_named: 5
+  mcp_tools_bound_to_rest: 4
+  mcp_only: 1
+  a2a_skills_named: 3
+  a2a_skills_bound_to_rest: 3
+  rest_operations_total: 7
+  rest_operations_with_tool: 3
+  rest_only: 4

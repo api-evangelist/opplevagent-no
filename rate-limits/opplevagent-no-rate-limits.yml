@@ -1,0 +1,65 @@
+generated: '2026-09-19'
+method: probed
+source: live response headers from https://opplevagent.no on 2026-09-19 (REST, /a2a, /mcp)
+docs: https://opplevagent.no/llms.txt
+limit_count: 4
+summary: >-
+  Two anonymous ceilings served as IETF RateLimit headers on every response — 300 requests per 900 seconds on REST
+  and 200 per 900 seconds on /a2a and /mcp — and a documented ~3x keyed tier (900 / 600) for callers presenting the
+  optional free X-API-Key. The exhaustion status code is not documented and was not provoked.
+headers:
+- name: RateLimit-Policy
+  example: 300;w=900
+- name: RateLimit-Limit
+  example: '300'
+- name: RateLimit-Remaining
+  example: '298'
+- name: RateLimit-Reset
+  example: '900'
+  note: Seconds until the window resets.
+exhaustion_status: undocumented
+rate_limits:
+- name: Anonymous REST requests
+  scope: per-client (anonymous)
+  limit: 300
+  window: 900s
+  metric: request
+  burst: null
+  applies_to:
+  - 'GET /api/opplevelser/discover'
+  - 'GET /api/opplevelser/categories'
+  - 'GET /api/opplevelser/{id}'
+  observed: 'RateLimit-Policy: 300;w=900 on /api/opplevelser/categories and /api/opplevelser/discover'
+  method: probed
+- name: Anonymous agent-endpoint requests
+  scope: per-client (anonymous)
+  limit: 200
+  window: 900s
+  metric: request
+  burst: null
+  applies_to:
+  - 'POST /a2a'
+  - 'POST /mcp'
+  observed: 'RateLimit-Policy: 200;w=900 on /mcp (initialize) and /a2a (message/send)'
+  method: probed
+- name: Keyed REST requests
+  scope: per-key
+  limit: 900
+  window: 900s
+  metric: request
+  burst: null
+  condition: X-API-Key header carrying a key issued by POST /api/keys
+  source: 'llms.txt: "ca. 3x høyere rate-grense (200→600 på /a2a og /mcp, 300→900 på /api/opplevelser/discover og andre REST-kall)"'
+  method: searched
+- name: Keyed agent-endpoint requests
+  scope: per-key
+  limit: 600
+  window: 900s
+  metric: request
+  burst: null
+  condition: X-API-Key header on /a2a or /mcp
+  source: llms.txt (same sentence as above)
+  method: searched
+notes:
+- The partition key for anonymous traffic (IP or otherwise) is not documented; "per-client" is the honest label.
+- The terms (https://opplevagent.no/vilkar) ask integrators to stay "within reasonable rates" and respect robots.txt and the rate limits; circumventing them is listed as prohibited use.

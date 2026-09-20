@@ -1,0 +1,223 @@
+# opplevagent.no — LLM-oversikt
+
+## Hva er dette?
+
+Opplevagent er en A2A-markedsplass for norske opplevelser og aktiviteter,
+bygget for å bli oppdaget og spurt av AI-agenter. Tjenesten lar agenter finne
+turer, kurs og opplevelser filtrert på fylke, kommune, kategori, vær, sesong,
+gruppestørrelse, alder, pris, varighet og språk.
+
+## ChatGPT Custom GPT
+
+ChatGPT Custom GPT — Opplevagent: https://chatgpt.com/g/g-6a3ab590a7f081919c528a15c6765a7d-opplevagent-finn-opplevelser-i-norge
+
+## MCP (Model Context Protocol) — Streamable HTTP
+
+MCP-endepunkt (Streamable HTTP):  https://opplevagent.no/mcp
+MCP Server Card:                  https://opplevagent.no/.well-known/mcp/server-card.json
+Koble til: lim inn https://opplevagent.no/mcp i Claude Desktop / ChatGPT som MCP-URL.
+
+Tilgjengelige MCP-verktøy:
+- discover_experiences         — finn opplevelser etter fylke, kategori, vær, sesong, pris, nær-meg (lat/lng/radius_km) m.m.
+- list_experience_categories   — hent alle kategorier med antall verifiserte opplevelser
+- get_experience               — hent fullstendig detalj for én opplevelse via UUID
+
+MCP Streamable HTTP krever et initialize-håndtrykk før tools/call — et bart
+tools/call uten forutgående initialize svarer med JSON-RPC-feil -32000
+("Server not initialized"). Steg 1 svarer med en mcp-session-id-header som
+MÅ sendes med i steg 2 (og alle senere kall i samme sesjon).
+
+Eksempel (steg 1: initialize — fang opp mcp-session-id fra svar-headerne):
+  SESSION_ID=$(curl -s -D - -o /dev/null -X POST https://opplevagent.no/mcp \
+    -H "Content-Type: application/json" \
+    -H "Accept: application/json, text/event-stream" \
+    -d '{"jsonrpc":"2.0","method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"eksempel-klient","version":"1.0.0"}},"id":"1"}' \
+    | grep -i '^mcp-session-id:' | tr -d '\r' | cut -d' ' -f2)
+
+Eksempel (steg 2: tools/call — discover, med mcp-session-id fra steg 1):
+  curl -X POST https://opplevagent.no/mcp \
+    -H "Content-Type: application/json" \
+    -H "Accept: application/json, text/event-stream" \
+    -H "mcp-session-id: $SESSION_ID" \
+    -d '{"jsonrpc":"2.0","method":"tools/call","params":{"name":"discover_experiences","arguments":{"fylke":"Oslo","weather":"rain","limit":5}},"id":"2"}'
+
+## A2A AI-discovery
+
+Agent Card (A2A-protokoll):   https://opplevagent.no/.well-known/agent-card.json
+Alias:                        https://opplevagent.no/agent-card.json
+A2A JSON-RPC 2.0 endepunkt:  https://opplevagent.no/a2a
+OpenAPI 3.1 spec:             https://opplevagent.no/openapi.json
+
+Støttede A2A JSON-RPC-metoder:
+- message/send  — finn opplevelser med naturlig språk eller strukturerte filtre
+- tasks/send    — bakoverkompatibelt alias for eldre A2A-klienter (<0.3)
+
+Eksempel (cURL):
+  curl -X POST https://opplevagent.no/a2a \
+    -H "Content-Type: application/json" \
+    -d '{"jsonrpc":"2.0","method":"message/send","params":{"message":{"text":"hva kan vi finne på i Oslo når det regner"}},"id":"1"}'
+
+## Discovery-API (REST)
+
+GET https://opplevagent.no/api/opplevelser/discover
+
+Filterparametre (query string):
+- fylke          fylkesnavn (f.eks. "Oslo", "Troms")
+- kommune        kommunenavn (f.eks. "Tromsø")
+- category       kategori (f.eks. "dyreliv_safari", "natur_friluft")
+- indoor_outdoor "indoor" | "outdoor" | "both"
+- weather        "rain" | "snow" | "clear" | "any" (regn/snø foretrekker innendørs / værsikre)
+- season         "summer" | "winter" | ...
+- group_size     antall personer i gruppen
+- age            alder på yngste deltaker
+- max_price      makspris i kroner
+- duration_max   maks varighet i minutter
+- language       påkrevd språk (f.eks. "en", "no")
+- lat            breddegrad for "nær meg"-søk (desimalgrader). Må oppgis sammen med lng.
+- lng            lengdegrad for "nær meg"-søk (desimalgrader). Må oppgis sammen med lat.
+- radius_km      maks avstand fra lat/lng i kilometer (gjelder kun sammen med lat/lng)
+- sort           "distance" — sorter stigende etter avstand fra lat/lng (allerede standard når lat/lng er oppgitt)
+- limit          maks antall resultater (standard 20, maks 100)
+
+Respons: JSON med { vertical:"experiences", query, count, results[] }.
+
+Når lat/lng er oppgitt, får hver rad et distance_km-felt (avrundet til én
+desimal) og et geo_precision-felt: "address" betyr posisjonen er hentet fra
+tilbyderens nøyaktige gateadresse (presis), "kommune" betyr et kommune-
+senterpunkt (omtrentlig — presenter aldri denne avstanden som eksakt). Rader
+uten geokodet posisjon i det hele tatt utelates fra svaret istedenfor å få en
+oppdiktet avstand.
+
+Eksempel:
+  GET https://opplevagent.no/api/opplevelser/discover?fylke=Oslo&weather=rain&group_size=4
+
+Eksempel (nær meg — innen 50 km fra Tromsø):
+  GET https://opplevagent.no/api/opplevelser/discover?lat=69.65&lng=18.95&radius_km=50
+
+## Flere REST-endepunkt
+
+GET https://opplevagent.no/api/opplevelser/categories   — alle kategorier med antall
+GET https://opplevagent.no/api/opplevelser/{id}         — én opplevelse via id
+
+## Gårdssalg & smaking (produsenter)
+
+Gårdssalg-produsenter (gårdsbutikk, sideri, bryggeri, vingård m.fl., med ærlig
+bookingstatus) er en egen vertikal i samme katalog — IKKE en del av
+`experiences`-tabellen. Søkbar via MCP, A2A (naturlig språk) og REST.
+
+MCP-verktøy: discover_gardssalg — samme to-stegs håndtrykk som MCP-seksjonen over.
+
+Eksempel (steg 1: initialize — fang opp mcp-session-id fra svar-headerne):
+  SESSION_ID=$(curl -s -D - -o /dev/null -X POST https://opplevagent.no/mcp \
+    -H "Content-Type: application/json" \
+    -H "Accept: application/json, text/event-stream" \
+    -d '{"jsonrpc":"2.0","method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"eksempel-klient","version":"1.0.0"}},"id":"1"}' \
+    | grep -i '^mcp-session-id:' | tr -d '\r' | cut -d' ' -f2)
+
+Eksempel (steg 2: tools/call — discover_gardssalg, med mcp-session-id fra steg 1):
+  curl -X POST https://opplevagent.no/mcp \
+    -H "Content-Type: application/json" \
+    -H "Accept: application/json, text/event-stream" \
+    -H "mcp-session-id: $SESSION_ID" \
+    -d '{"jsonrpc":"2.0","method":"tools/call","params":{"name":"discover_gardssalg","arguments":{"fylke":"Vestland","limit":5}},"id":"2"}'
+
+REST (samme søkeflate, uten MCP-håndtrykk):
+  GET https://opplevagent.no/api/opplevelser/discover?category=gardssalg_smaking&fylke=Vestland
+
+Gårdssalg-spesifikke filtre (i tillegg til fylke/kommune/lat/lng/radius_km fra
+Discovery-API-seksjonen over): producer_type, booking_live=true (kun literalen
+"true" filtrerer — utelatt betyr «ingen filter på denne kolonnen»), og q
+(fritekst navn/sted-oppslag av ÉN bestemt produsent, f.eks. q=Fjordgard%20Bryggeri
+— alle ord må treffe navn/slug/poststed/kommune; eksakt navnetreff rangeres
+først). I MCP-verktøyet discover_gardssalg heter den samme parameteren `query`.
+
+Respons: JSON med { vertical:"gardssalg", query, count, results[] }, der hver
+rad har id (= provider_id for booking)/navn/fylke/kommune/producer_type/lat/lon/
+geocode_confidence/profile_url og et `booking`-felt ({live, mode, note}) som
+ærlig speiler dark-launch-status — aldri en påstått aktiv booking før
+reservasjoner faktisk er åpnet.
+
+### Booking via MCP (book_gardssalg) — én setning, ett kall
+
+MCP-verktøy: book_gardssalg — send inn en reservasjonsforespørsel for en
+gårdssalg-produsent, samme to-stegs håndtrykk som over. Produsenten oppgis
+ENTEN som provider_id (id-feltet fra discover_gardssalg) ELLER som
+provider_query (produsentens navn slik gjesten sa det, f.eks. "Fjordgard
+Bryggeri"). Krever i tillegg slot_at (YYYY-MM-DDTHH:MM, Europe/Oslo),
+party_size, guest_name, guest_email (gjestens egne — spør gjesten, finn aldri
+på). Valgfritt: requested_weekday (ukedagen gjesten sa, f.eks. "fredag"),
+guest_phone, notes, confirm_outside_hours.
+
+«Book et møte hos X fredag den 20. oktober klokken 10» er dermed ETT kall:
+provider_query="X", slot_at="2026-10-20T10:00", requested_weekday="fredag",
+party_size, guest_name, guest_email. Verktøyet løser X til nøyaktig én
+produsent (flere treff → reason "provider_ambiguous" med candidates[] du kan
+legge fram for gjesten; ingen treff → "provider_not_found"; ingen booking
+opprettes i noen av tilfellene), sjekker at datoen faktisk er en fredag
+(20. oktober 2026 er en tirsdag → weekday_mismatch:true med de nærmeste
+fredagene i suggestions[], ingen booking opprettet), og sender så
+forespørselen til produsenten. Svaret ved suksess bærer provider.navn og
+slot_at_local ("fredag 23. oktober 2026 kl. 10:00") — les begge tilbake til
+gjesten. Samme flyt og samme svar via REST: POST https://opplevagent.no/api/opplevelser/book
+med de samme feltene i JSON-body.
+
+VIKTIG: verktøyet oppretter ALDRI en bekreftet booking — kun samme avventende
+("reserved"/pending) rad som nettskjemaet på produsentens profilside
+produserer, via nøyaktig samme valideringskjede, database-tabell og
+bekreftelses-e-post-flyt. Produsenten mottar forespørselen og svarer på
+e-post (bekrefter, foreslår nytt tidspunkt eller avslår) — reservasjonen
+blir IKKE endelig før produsenten har svart, og ingen AI-agent kan bekrefte
+en booking på gjestens eller produsentens vegne. En produsent uten aktiv
+bookingstatus (se discover_gardssalgs `booking.live`) avvises med en
+tydelig melding, aldri en stille feil. Ingen betaling — pickup/oppmøte, som
+i dag.
+
+## Lisens
+
+Provider-data verifiseres mot Brønnøysundregistrene (CC0). Innhold gjengis
+som faktaoppsummering med kildehenvisning.
+
+## Frivillig API-nøkkel (forbruker-identitet)
+
+Helt valgfritt — alle søk-/lese-endepunktene over er allerede åpne uten nøkkel, og dette er
+IKKE en pålogging eller et krav for å bruke tjenesten.
+
+- Hent en gratis nøkkel: `POST https://opplevagent.no/api/keys` med valgfri JSON-body
+  `{ "label": "min-agent", "contact_email": "..." }` (begge felt valgfrie). Svaret inneholder
+  `key` — vis den KUN denne ene gangen, den kan ikke hentes igjen.
+- Bruk den: send nøkkelen som `X-API-Key`-header på ethvert MCP-/A2A-/REST-kall.
+- Fordel: ca. 3x høyere rate-grense (200→600 på `/a2a` og `/mcp`, 300→900 på
+  `/api/opplevelser/discover` og andre REST-kall), pluss at kallene dine telles i en aggregert
+  forbrukslogg (kun endepunkt/verktøynavn og dato — aldri innhold eller argumenter).
+- Tilbakekall/slett: `POST https://opplevagent.no/api/keys/revoke` (stanser nøkkelen, historikk beholdes)
+  eller `POST https://opplevagent.no/api/keys/erase` (GDPR-sletting av label/e-post). Begge tar
+  `{ "key": "..." }` i body, eller nøkkelen som `X-API-Key`-header.
+
+Eksempel (cURL):
+  curl -X POST https://opplevagent.no/api/keys \
+    -H "Content-Type: application/json" \
+    -d '{"label":"my-agent"}'
+
+Voluntary — every search/read endpoint above already works with no key, and this is NOT a
+login or a requirement to use the service. Get a free key via `POST /api/keys`
+(optional `label`/`contact_email`), send it back as the `X-API-Key` header on any call for a
+higher rate-limit tier, and revoke/erase it any time via `POST /api/keys/revoke` or
+`POST /api/keys/erase`.
+
+## Datakvalitet og verifisering
+
+https://opplevagent.no/proveniens
+
+Hver tilbyder kontrolleres mot Brønnøysundregistrene for å bekrefte at det står et aktivt,
+registrert selskap bak opplevelsen — tilbydere som består sjekken får et «✓ Brreg-verifisert»-
+merke. Detaljer som beskrivelse og varighet berikes fra tilbyderens egen nettside, med
+kildehenvisning. Opplevelser fra en tilbyder som ennå ikke er bekreftet mot Brønnøysundregistrene
+publiseres ikke på nettstedet — de blir synlige først når tilbyderen er bekreftet som et aktivt,
+registrert selskap. Se https://opplevagent.no/proveniens for hele forklaringen.
+
+Every provider is checked against Brønnøysundregistrene to confirm there is an active,
+registered company behind the experience — providers that pass get a "✓ Brreg-verified" badge.
+Details such as description and duration are enriched from the provider's own website, with
+source attribution. Experiences from a provider not yet confirmed against Brønnøysundregistrene
+are not published on the site — they only become visible once the provider is confirmed as an
+active, registered company. See https://opplevagent.no/proveniens for the full explanation.

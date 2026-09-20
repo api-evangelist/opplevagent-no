@@ -1,0 +1,66 @@
+generated: '2026-09-19'
+method: probed
+source: openapi/opplevagent-no-openapi.yml
+docs: https://opplevagent.no/llms.txt
+format: plain-json
+envelope:
+  media_type: application/json
+  fields:
+  - name: error
+    description: Short human-readable message (e.g. "Invalid query", "Not found").
+  - name: details
+    description: Present on validation failures — an array of issue objects {code, path[], message} in the shape of a zod issue list.
+  example:
+    error: Invalid query
+    details:
+    - code: custom
+      path: [lat]
+      message: lat and lng must both be provided together
+  note: >-
+    The OpenAPI declares 400 and 404 responses with descriptions only (no content schema). The envelope above was
+    observed live on 2026-09-19: GET /api/opplevelser/discover?lat=69.65 returned 400 with the example body, and GET
+    /api/opplevelser/00000000-0000-0000-0000-000000000000 returned 404 {"error":"Not found"}. Not RFC 9457.
+consistency_gap: >-
+  No error-code registry is published, the `error` string is the only discriminator, and a malformed UUID path
+  segment returns the same {"error":"Not found"} as an unknown one. Unknown non-API routes return an HTML 404 page.
+problem_types:
+- status: 400
+  title: Invalid query
+  source_operation: openapi/opplevagent-no-openapi.yml#discoverExperiences
+  cause: Query parameters fail validation — e.g. lat without lng, out-of-range numbers, unknown enum values.
+  remediation: Read details[].path and details[].message; lat and lng must be sent together; limit is 1-100.
+  observed: true
+- status: 404
+  title: Not found
+  source_operation: openapi/opplevagent-no-openapi.yml#getExperience
+  cause: No published experience with that UUID, or the segment is not a UUID.
+  remediation: Take the id from a discoverExperiences result; unverified providers' experiences are not published and will 404.
+  observed: true
+- status: 404
+  title: Not found (JSON)
+  source_operation: undeclared — GET https://opplevagent.no/api/opplevelser/book
+  cause: The booking path only answers POST (documented in llms.txt); a GET returns application/json {"error":"Not found"}.
+  observed: true
+jsonrpc_errors:
+- code: -32000
+  message: 'Bad Request: Server not initialized'
+  http_status: 400
+  surface: https://opplevagent.no/mcp
+  cause: tools/call or tools/list sent without a prior initialize / without the mcp-session-id header.
+  remediation: Send initialize first, capture mcp-session-id from the response headers, and include it on every later call (documented in llms.txt).
+  observed: true
+- code: -32601
+  message: Method not found
+  http_status: 200
+  surface: https://opplevagent.no/mcp
+  cause: prompts/list — the server has no prompts capability.
+  observed: true
+tool_level_outcomes:
+  note: >-
+    book_gardssalg reports non-error outcomes inside its result rather than as JSON-RPC errors, per llms.txt:
+    reason "provider_ambiguous" with candidates[], "provider_not_found", weekday_mismatch true with suggestions[],
+    outside_hours true (retry with confirm_outside_hours), and a rejection message for producers whose booking.live
+    is false. None of these create a booking.
+rate_limit_exhaustion:
+  status: undocumented
+  note: The RateLimit-* headers are served on every response but the status code on exhaustion is not documented and was not provoked.

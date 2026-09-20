@@ -1,0 +1,10 @@
+# agents.txt — opplevagent.no
+# A2A-markedsplass for norske opplevelser og aktiviteter.
+
+Agent-card: https://opplevagent.no/.well-known/agent-card.json
+MCP-endpoint: https://opplevagent.no/mcp
+MCP-server-card: https://opplevagent.no/.well-known/mcp/server-card.json
+A2A-endpoint: https://opplevagent.no/a2a
+OpenAPI: https://opplevagent.no/openapi.json
+LLM-oversikt: https://opplevagent.no/llms.txt
+Discovery: https://opplevagent.no/api/opplevelser/discover

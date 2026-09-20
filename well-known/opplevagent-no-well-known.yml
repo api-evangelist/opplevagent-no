@@ -1,0 +1,104 @@
+generated: '2026-09-19'
+method: probed
+source: >-
+  Live GET probes of the named /.well-known/* path list on opplevagent.no and www.opplevagent.no on 2026-09-19,
+  with a browser User-Agent. Every row is a request that was issued; every status is the one returned.
+summary:
+  hosts_probed: 2
+  paths_probed: 22
+  documents_served: 5
+  path_echo_control: passed
+  note: >-
+    One origin carries everything Opplevagent publishes — apex website, REST base, OpenAPI servers[] host, MCP
+    endpoint and A2A endpoint are all https://opplevagent.no — so the host set collapses to the apex plus www
+    (which 301s every path to the apex). Served documents: the A2A agent card, an MCP server card (also at
+    /.well-known/mcp.json, byte-identical), and a plain-text agents.txt index. No security.txt, no OAuth/OIDC
+    discovery (the surface is anonymous by design), no RFC 9727 api-catalog, no apis.json. The 404 body is a real
+    "Side ikke funnet (404)" page, not an SPA shell, and the negative-control path also 404d.
+  sibling_link_headers: >-
+    Every response from opplevagent.no carries a Link: header advertising an agent card, MCP server card,
+    agent-skills index, api-catalog, openapi.yaml, sitemap and service-doc on rettfrabonden.com — a sibling site by
+    the same operator on the same codebase. Those documents describe Rett fra Bonden, not Opplevagent, and were NOT
+    harvested here; opplevagent.no's own /.well-known/agent-skills/index.json and /.well-known/api-catalog 404.
+hosts:
+- host: opplevagent.no
+  role: apex website, REST base, OpenAPI servers[] host, MCP host, A2A host
+  documents:
+  - path: /.well-known/agent-card.json
+    status: 200
+    content_type: application/json; charset=utf-8
+    file: ../a2a/opplevagent-no-agent-card.json
+    standard: A2A Agent Card (RFC 8615 well-known)
+    note: Saved verbatim under a2a/ and graded in a2a/opplevagent-no-a2a.yml.
+  - path: /.well-known/agent.json
+    status: 404
+  - path: /.well-known/mcp/server-card.json
+    status: 200
+    content_type: application/json; charset=utf-8
+    file: opplevagent-no-mcp-server-card.json
+    standard: MCP server card (schemaVersion 2025-11)
+  - path: /.well-known/mcp.json
+    status: 200
+    content_type: application/json; charset=utf-8
+    file: opplevagent-no-mcp.json
+    note: Byte-identical to /.well-known/mcp/server-card.json.
+  - path: /.well-known/agents.txt
+    status: 200
+    content_type: text/plain; charset=utf-8
+    file: opplevagent-no-agents.txt
+    note: Non-standard plain-text index naming the agent card, MCP endpoint, server card, A2A endpoint, OpenAPI, llms.txt and discovery URL.
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+  - path: /.well-known/oauth-protected-resource
+    status: 404
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/api-catalog.json
+    status: 404
+  - path: /.well-known/ai-plugin.json
+    status: 404
+  - path: /.well-known/ucp.json
+    status: 404
+  - path: /.well-known/acp.json
+    status: 404
+  - path: /.well-known/aauth-resource.json
+    status: 404
+  - path: /.well-known/apis.json
+    status: 404
+  - path: /apis.json
+    status: 404
+  - path: /apis.yml
+    status: 404
+  - path: /.well-known/agent-skills/index.json
+    status: 404
+  - path: /.well-known/opplevagent-no-negative-control-9c1f3a7e.json
+    status: 404
+    control: negative
+- host: www.opplevagent.no
+  role: redirect host
+  documents:
+  - path: /.well-known/agent-card.json
+    status: 301
+    note: Location https://opplevagent.no/.well-known/agent-card.json
+  - path: /.well-known/agent.json
+    status: 301
+    note: Location https://opplevagent.no/.well-known/agent.json (which 404s)
+related_root_documents:
+- path: /llms.txt
+  status: 200
+  file: ../llms/opplevagent-no-llms.txt
+- path: /openapi.json
+  status: 200
+  file: ../openapi/_original/opplevagent-no-openapi.json
+- path: /agent-card.json
+  status: 200
+  note: Alias of the well-known card, documented in llms.txt.
+- path: /robots.txt
+  status: 200
+  note: Explicitly allows GPTBot, OAI-SearchBot, ClaudeBot, anthropic-ai, PerplexityBot and Google-Extended; disallows only booking/owner flows and /admin/.
+- path: /manifest.json
+  status: 200

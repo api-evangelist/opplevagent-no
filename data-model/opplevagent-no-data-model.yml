@@ -1,0 +1,66 @@
+generated: '2026-09-19'
+method: derived
+source: openapi/opplevagent-no-openapi.yml
+docs: https://opplevagent.no/llms.txt
+summary: >-
+  Two component schemas (Experience, GardssalgProducer) returned by one discover operation, discriminated by the
+  response's `vertical` field. Both are rows of a curated catalog whose root entity — the Brreg-verified provider —
+  is not itself exposed as a schema: Experience carries a booking_url to the provider's own site, and
+  GardssalgProducer IS the provider row (its id is the provider_id used by the booking flow). Relationships are by
+  slug/id field, not by $ref nesting; the spec has no $ref between the two schemas.
+id_style:
+  format: UUID
+  prefixes_published: false
+  note: Experience.id and GardssalgProducer.id are UUIDs; experiences also carry a URL slug ending in an 8-hex-character suffix (observed live, not in the schema).
+entities:
+- name: Experience
+  vocabulary_id: experience
+  schema: Experience
+  description: A published, provider-verified experience or activity (tour, course, attraction).
+  key_fields: [id, title, category, fylke, kommune, indoor_outdoor, duration_min, price_from, price_band, booking_url, confidence, tags, distance_km, geo_precision]
+  relationships:
+  - belongs_to: Category
+    via: category
+  - belongs_to: County
+    via: fylke
+  - belongs_to: Municipality
+    via: kommune
+  - belongs_to: Provider
+    via: booking_url (external) — the live A2A response also carries provider_id and provider_match_status, which the schema omits
+- name: GardssalgProducer
+  vocabulary_id: gardssalg-producer
+  schema: GardssalgProducer
+  description: A Brreg-registered farm-sale drink producer (bryggeri, cideri, vingård, destilleri, gårdskafé, mjød, seltzeri) — stored in experience_providers, distinct from Experience.
+  key_fields: [id, navn, fylke, kommune, producer_type, lat, lon, geocode_confidence, booking, profile_url, distance_km]
+  relationships:
+  - belongs_to: County
+    via: fylke
+  - belongs_to: Municipality
+    via: kommune
+  - has_many: BookingRequest
+    via: id (= provider_id on book_gardssalg / POST /api/opplevelser/book)
+  - has_one: BookingStatus
+    via: booking {live, mode, note}
+- name: Category
+  vocabulary_id: category
+  schema: null
+  description: Slug + count from GET /api/opplevelser/categories (nine live values, e.g. kultur_historie, natur_friluft); gardssalg_smaking is a routing value, not a listed category.
+  relationships:
+  - has_many: Experience
+    via: category
+- name: BookingRequest
+  vocabulary_id: booking-request
+  schema: null
+  description: >-
+    Pending reservation request created by the MCP tool book_gardssalg (or the undeclared POST /api/opplevelser/book):
+    provider_id | provider_query, optional experience_id, slot_at, party_size, guest_name, guest_email, guest_phone,
+    notes. Never confirmed by the API; the producer responds by e-mail.
+  relationships:
+  - belongs_to: GardssalgProducer
+    via: provider_id
+  - belongs_to: Experience
+    via: experience_id (optional)
+discriminators:
+  discover_response.vertical: {experiences: Experience, gardssalg: GardssalgProducer}
+geography:
+  note: fylke (county) and kommune (municipality) are free-text names matching the site's /fylke/{name} and /kommune/{name} pages (17 counties, 186 municipalities in the sitemap).

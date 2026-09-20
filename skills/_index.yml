@@ -1,0 +1,23 @@
+generated: '2026-09-19'
+method: generated
+source: >-
+  openapi/opplevagent-no-openapi.yml (every operationId verified against the spec), the live MCP tools/list saved at
+  mcp/opplevagent-no-mcp-tools.json, and https://opplevagent.no/llms.txt. No provider-published skill files were
+  found (/.well-known/agent-skills/index.json 404; no AGENTS.md in the repository root).
+skills:
+- file: opplevagent-no-discover-experiences.md
+  name: opplevagent-discover-experiences
+  method: generated
+  description: Find Norwegian experiences by place, category, weather, season, group, age, price or proximity, then read one in full.
+  operations: 3
+- file: opplevagent-no-a2a-natural-language-discovery.md
+  name: opplevagent-a2a-natural-language-discovery
+  method: generated
+  description: Ask Opplevagent in plain Norwegian or English over the A2A JSON-RPC endpoint and read the Task artifacts back.
+  operations: 2
+- file: opplevagent-no-gardssalg-discover-and-book.md
+  name: opplevagent-gardssalg-discover-and-book
+  method: generated
+  description: Find a farm-sale drink producer and submit a pending visit request on a guest's behalf, without ever claiming a confirmed booking.
+  operations: 1
+  tools: 2

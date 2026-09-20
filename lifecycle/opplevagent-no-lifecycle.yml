@@ -1,0 +1,38 @@
+generated: '2026-09-19'
+method: searched
+source: https://opplevagent.no/llms.txt
+derived_from: openapi/opplevagent-no-openapi.yml
+versioning:
+  scheme: unversioned paths; version carried in the documents only
+  current_version: 0.1.0
+  spec_url: https://opplevagent.no/openapi.json
+  base_url: https://opplevagent.no
+  policy_published: false
+  note: >-
+    OpenAPI info.version, the agent card version and the MCP serverInfo.version all read 0.1.0. Paths are
+    unversioned (/api/opplevelser/...). The npm package opplevagent-mcp is at 0.2.0 (published 2026-09-02). No
+    written versioning policy exists.
+deprecation:
+  policy_published: false
+  sunset_header: false
+  deprecation_header: false
+  rfc8594: false
+  deprecated_operations: []
+  backward_compatibility_notes:
+  - surface: A2A
+    note: llms.txt keeps tasks/send as a "backward-compatible alias for older A2A clients (<0.3)" alongside message/send; the OpenAPI enum declares both.
+  - surface: MCP
+    note: >-
+      The server card lists five supported protocol versions (2024-10-07 through 2025-11-25) and states the
+      2026-07-28 era is NOT supported — a forward-compatibility gap the provider documents rather than a deprecation.
+sla:
+  published: false
+  note: The terms (https://opplevagent.no/vilkar) state the service is provided "as is" ("som den er") with no uptime commitment.
+status_page: null
+changelog:
+  published: false
+  note: No dated changelog page or feed; /changelog 404s. The only dated release signal is the npm version history of opplevagent-mcp.
+data_retention:
+  source: https://opplevagent.no/personvern
+  aggregated_analytics: 'opptil 180 dager'
+  experience_data: 'så lenge opplevelsen er aktiv'

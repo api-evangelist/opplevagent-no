@@ -1,0 +1,48 @@
+generated: '2026-09-19'
+method: searched
+probe: true
+source: >-
+  Artifacts harvested this run (well-known/, security/, lifecycle/, conformance/), live probes of the conventional
+  paths listed below, and the personvern / vilkår / proveniens pages.
+signals:
+  data_subject_request:
+    url: https://opplevagent.no/personvern
+    api: https://opplevagent.no/api/keys/erase
+    note: >-
+      The privacy page ("Rettighetene dine") directs removal and correction requests to kontakt@opplevagent.no, and
+      llms.txt documents POST /api/keys/erase as GDPR deletion ("GDPR-sletting") of the label and contact e-mail
+      attached to a consumer key, callable with the key in the body or the X-API-Key header. The API covers only
+      key-holder data; provider/listing data requests go by e-mail.
+not_found:
+  sbom: No SBOM published; /security and /sikkerhet 404.
+  support_lifetime: No stated support period anywhere; no versioning page.
+  accessibility_conformance: /accessibility and /tilgjengelighet 404; no VPAT or WCAG statement (a skip-link and focus styles are present in the HTML but that is not a conformance report).
+  training_data_summary: none
+  ai_transparency: >-
+    The provenance page describes how data is verified and explicitly disclaims being a certification or a
+    compliance claim; it is a data-provenance statement, not an AI-system transparency disclosure, so it is not
+    recorded as this signal.
+  global_privacy_control: No published GPC statement (the privacy page says no tracking cookies and no third-party analytics, which is a different commitment).
+  subprocessors: No subprocessor list; /legal/subprocessors 404. Hosting on Fly.io is observable from the Server header but not published.
+  data_residency: none stated
+  incident_notification: none stated
+  age_assurance: none
+  notice_and_action: none (provider takedown/correction goes through kontakt@opplevagent.no, which is a listing-correction path, not a DSA notice mechanism)
+  transparency_report: none (the English home page shows aggregate traffic counters, which is not a transparency report)
+  exit_assistance: none
+probes:
+- {url: https://opplevagent.no/accessibility, status: 404}
+- {url: https://opplevagent.no/tilgjengelighet, status: 404}
+- {url: https://opplevagent.no/legal/subprocessors, status: 404}
+- {url: https://opplevagent.no/security, status: 404}
+- {url: https://opplevagent.no/sikkerhet, status: 404}
+- {url: https://opplevagent.no/status, status: 404}
+- {url: https://opplevagent.no/personvern, status: 200}
+- {url: https://opplevagent.no/vilkar, status: 200}
+- {url: https://opplevagent.no/proveniens, status: 200}
+published_statements:
+  privacy_last_updated: '22. juni 2026'
+  retention: 'Aggregerte analytikkdata lagres i opptil 180 dager.'
+  no_tracking: 'Ingen sporingscookies. Ingen tredjeparts analyseverktøy. Ingen betalinger eller kortdata.'
+  operator: 'Daniel Fredriksen, Norge'
+  governing_law: 'Norsk rett'

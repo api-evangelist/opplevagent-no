@@ -1,0 +1,158 @@
+generated: '2026-09-19'
+method: probed
+status: published
+source: https://opplevagent.no/mcp
+docs: https://opplevagent.no/guide-opplevelser-mcp
+server_card: https://opplevagent.no/.well-known/mcp/server-card.json
+summary: >-
+  Opplevagent operates ONE remote MCP server at https://opplevagent.no/mcp (Streamable HTTP, anonymous, session-based)
+  and ships the same server as the opplevagent-mcp npm package for stdio clients. A live anonymous initialize +
+  tools/list on 2026-09-19 returned five tools with full inputSchema and annotations, and two ui:// resources.
+deployment:
+  mode: both
+  endpoint: https://opplevagent.no/mcp
+  install: npx opplevagent-mcp
+  package: https://www.npmjs.com/package/opplevagent-mcp
+  auth: none
+  verified: probed
+  note: >-
+    The remote endpoint was exercised directly (initialize 200, tools/list 200, resources/list 200, no credential).
+    The stdio package is verbatim from the provider's README and guide page ("npx opplevagent-mcp"; Claude Desktop
+    config {"command":"npx","args":["opplevagent-mcp"]}); npm reports 0.2.0 published 2026-09-02 by the same
+    maintainer (slookisen) whose repository the server card names. An optional free X-API-Key raises the rate
+    ceiling but is never required.
+servers:
+- id: opplevagent
+  name: Opplevagent — norske opplevelser
+  endpoint: https://opplevagent.no/mcp
+  transport: streamable-http
+  auth: none
+  status: live
+  probe:
+    fetched: '2026-09-19'
+    initialize:
+      http_status: 200
+      content_type: text/event-stream
+      protocol_version_negotiated: '2024-11-05'
+      server_info: {name: opplevagent, version: 0.1.0}
+      capabilities: {tools: {listChanged: true}, resources: {listChanged: true}}
+      session_header: mcp-session-id
+    tools_list: {http_status: 200, tool_count: 5, file: mcp/opplevagent-no-mcp-tools.json}
+    resources_list: {http_status: 200, resource_count: 2, file: mcp/opplevagent-no-mcp-resources.json}
+    prompts_list: {http_status: 200, jsonrpc_error: -32601, note: Method not found — no prompts capability.}
+    tools_list_without_initialize:
+      http_status: 400
+      body: '{"jsonrpc":"2.0","error":{"code":-32000,"message":"Bad Request: Server not initialized"},"id":null}'
+      note: >-
+        The server is session-based: a bare tools/list (no prior initialize, no mcp-session-id) is rejected with
+        JSON-RPC -32000. llms.txt documents this two-step handshake explicitly.
+    rate_limit_headers: 'RateLimit-Policy: 200;w=900, RateLimit-Limit: 200, RateLimit-Remaining, RateLimit-Reset'
+  protocol_support:
+    server_card_claims: ['2025-11-25', '2025-06-18', '2025-03-26', '2024-11-05', '2024-10-07']
+    era: handshake
+    note: >-
+      The server card states "modernEraSupported: false" — the 2026-07-28 era (per-request _meta, server/discover)
+      is not supported and such clients receive "Server not initialized". Newest negotiable version per the card
+      is 2025-11-25; this probe negotiated 2024-11-05 because that is what it requested.
+  tools:
+  - name: discover_experiences
+    title: Discover Norwegian experiences
+    read_only: true
+    annotations: {readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true}
+    input_schema:
+      fylke: string
+      kommune: string
+      category: string
+      weather: 'string enum [rain, snow, clear, any]'
+      season: string
+      indoor_outdoor: 'string enum [indoor, outdoor, both]'
+      group_size: integer
+      age: integer
+      max_price: integer (NOK)
+      duration_max: integer (minutes)
+      language: string
+      lat: number
+      lng: number
+      radius_km: number
+      sort: 'string enum [distance]'
+      limit: number (default 20, max 50)
+    required: []
+    rest_operation: discoverExperiences
+  - name: list_experience_categories
+    title: List experience categories
+    read_only: true
+    annotations: {readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false}
+    input_schema: {}
+    required: []
+    rest_operation: listExperienceCategories
+  - name: get_experience
+    title: Get experience details
+    read_only: true
+    annotations: {readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true}
+    input_schema: {id: string (UUID)}
+    required: [id]
+    rest_operation: getExperience
+  - name: discover_gardssalg
+    title: Discover gårdssalg producers
+    read_only: true
+    annotations: {readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true}
+    input_schema:
+      fylke: string
+      kommune: string
+      producer_type: string (bryggeri, cideri, vingård, destilleri, gårdskafé, mjød, seltzeri)
+      query: string (free-text lookup of one producer)
+      booking_live: boolean
+      lat: number
+      lng: number
+      radius_km: number
+      limit: number (default 20, max 50)
+    required: []
+    rest_operation: discoverExperiences (category=gardssalg_smaking)
+  - name: book_gardssalg
+    title: Request a gårdssalg booking
+    read_only: false
+    annotations: {readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true}
+    input_schema:
+      provider_id: string
+      provider_query: string
+      requested_weekday: string
+      experience_id: string
+      slot_at: 'string YYYY-MM-DDTHH:MM (Europe/Oslo)'
+      party_size: number (1-50)
+      guest_name: string
+      guest_email: string
+      guest_phone: string
+      notes: string
+      confirm_outside_hours: boolean
+    required: [slot_at, party_size, guest_name, guest_email]
+    rest_operation: null
+    note: >-
+      The only write tool. The tool description states it NEVER creates a confirmed booking — it creates the same
+      pending request the producer's own web form creates; the producer confirms, proposes another time or declines
+      by email. The REST twin, POST /api/opplevelser/book, is documented in llms.txt but is not declared in the
+      OpenAPI. idempotentHint is false and no replay key is documented.
+  resources:
+  - uri: ui://opplevagent/experiences-list
+    mime_type: text/html
+    description: ChatGPT inline card list for discover_experiences results.
+  - uri: ui://opplevagent/experience-detail
+    mime_type: text/html
+    description: ChatGPT inline card for get_experience results.
+discrepancies:
+- The server card (/.well-known/mcp/server-card.json, byte-identical to /.well-known/mcp.json) lists three tools;
+  the live tools/list returns five. The two extra gårdssalg tools are documented in llms.txt and the npm README,
+  so the card is stale rather than the server over-exposing.
+- The server card says capabilities.tools.listChanged false; the live initialize says true.
+- The server card's "authentication" text says all tools are read-only; book_gardssalg is a write tool.
+distribution:
+- channel: remote-mcp
+  url: https://opplevagent.no/mcp
+- channel: npm
+  package: opplevagent-mcp
+  version: 0.2.0
+  published: '2026-09-02'
+  url: https://www.npmjs.com/package/opplevagent-mcp
+  repository: https://github.com/slookisen/lokal (directory mcp-server-opplevagent)
+- channel: custom-gpt
+  url: https://chatgpt.com/g/g-6a3ab590a7f081919c528a15c6765a7d-opplevagent-finn-opplevelser-i-norge
+  note: ChatGPT Custom GPT using three Actions on openapi.json (per the agent card's x-distribution).

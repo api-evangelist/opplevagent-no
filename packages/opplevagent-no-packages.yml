@@ -1,0 +1,31 @@
+generated: '2026-09-19'
+method: searched
+source: https://registry.npmjs.org/opplevagent-mcp
+docs: https://opplevagent.no/guide-opplevelser-mcp
+note: >-
+  One first-party package: the MCP server itself, published to npm for stdio clients. It is NOT a client SDK for the
+  REST API — no SDKs pointer is emitted. Searched npm (hit), PyPI (404), and the GitHub repository the server card
+  names; Maven/NuGet/RubyGems/crates/Go were not expected for a Node-only project and the npm search returned only
+  this package. Version and date were read from the npm registry metadata endpoint on 2026-09-19.
+packages:
+- language: javascript
+  name: opplevagent-mcp
+  kind: mcp-server
+  registry: npm
+  official: true
+  url: https://www.npmjs.com/package/opplevagent-mcp
+  install: npx opplevagent-mcp
+  bin: opplevagent-mcp
+  repository: https://github.com/slookisen/lokal
+  repository_directory: mcp-server-opplevagent
+  homepage: https://opplevagent.no
+  license: MIT
+  version: 0.2.0
+  published: '2026-09-02'
+  maintainer: slookisen (Daniel Fredriksen — the operator named on https://opplevagent.no/personvern)
+  first_party_basis: >-
+    npm maintainer is the owner of the repository the provider's own MCP server card and guide page link to;
+    package homepage is opplevagent.no; the README documents the same remote endpoint https://opplevagent.no/mcp.
+  note: >-
+    The registry page https://www.npmjs.com/package/opplevagent-mcp returned 403 to a plain fetch (npm's edge bot
+    policy); the registry API answered 200 and is the source of record here.

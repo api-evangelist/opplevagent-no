@@ -1,0 +1,161 @@
+generated: '2026-09-19'
+method: probed
+source: https://opplevagent.no/.well-known/agent-card.json
+card:
+  file: a2a/opplevagent-no-agent-card.json
+discovery:
+  path: /.well-known/agent-card.json
+  canonical: true
+  host: opplevagent.no
+  note: >-
+    Served from the apex host, which is also the OpenAPI servers[] host, the REST base, the MCP host and the A2A
+    endpoint host — Opplevagent runs everything on one origin. www.opplevagent.no 301s every /.well-known/* path
+    to the apex. The legacy /.well-known/agent.json 404s (a real HTML 404 page titled "Side ikke funnet (404)",
+    not an SPA shell). The provider also publishes an alias at https://opplevagent.no/agent-card.json (200) and
+    names both in llms.txt and /.well-known/agents.txt. Ownership is not in question: provider.organization is
+    "Opplevagent", provider.url is https://opplevagent.no, the card's endpoints block points only at
+    opplevagent.no, and the OpenAPI it links declares servers[] https://opplevagent.no.
+x-evidence:
+  fetched: '2026-09-19'
+  url: https://opplevagent.no/.well-known/agent-card.json
+  http_status: 200
+  content_type: application/json; charset=utf-8
+  body_bytes: 5464
+  body_parses_as: JSON object with AgentCard shape (name, url, version, protocolVersion, capabilities, skills all present)
+  corroborating_probes:
+  - url: https://opplevagent.no/.well-known/agent.json
+    http_status: 404
+  - url: https://www.opplevagent.no/.well-known/agent-card.json
+    http_status: 301
+    note: Redirects to the apex card.
+  - url: https://opplevagent.no/agent-card.json
+    http_status: 200
+    note: Non-standard alias the provider documents in llms.txt.
+  - url: https://opplevagent.no/a2a
+    http_status: 200
+    note: GET returns the same agent card JSON (the OpenAPI operation getExperiencesA2ACard describes it as a health check).
+  - url: https://opplevagent.no/a2a
+    method: POST
+    http_status: 200
+    note: >-
+      A live message/send with {"message":{"text":"hvalsafari i Tromsø"}} returned a JSON-RPC 2.0 result carrying
+      taskId, status.state "completed" and two artifacts (a text summary and a data part with 20 experiences).
+      The endpoint is a working agent surface, not a placeholder. Response carried RateLimit-Policy 200;w=900.
+agent_card:
+  name: Opplevagent
+  description: >-
+    A2A marketplace for Norwegian experiences and activities, queryable by AI agents — discover tours, courses and
+    things to do filtered by county, municipality, category, weather, season, group size, age and price (bilingual
+    Norwegian/English description in the card).
+  version: 0.1.0
+  url: https://opplevagent.no/a2a
+  protocol_version: 1.0.0
+  preferred_transport: JSONRPC
+  additional_interfaces:
+  - url: https://opplevagent.no/api/opplevelser
+    transport: HTTP+JSON
+  provider:
+    organization: Opplevagent
+    url: https://opplevagent.no
+  capabilities:
+    streaming: false
+    push_notifications: false
+    state_transition_history: false
+  default_input_modes: [text/plain, application/json]
+  default_output_modes: [application/json]
+  security_schemes:
+    consumerApiKey:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      note: >-
+        Described in the card as voluntary and free — obtained via POST /api/keys with no account — and never
+        required; search is fully open without it. Sending it raises the rate ceiling from 200 to 600 requests
+        per window on /a2a and /mcp.
+  authentication:
+    schemes: [none]
+  skill_count: 3
+  skills:
+  - id: opplevelser_discover
+    name: Finn opplevelser / Discover experiences
+    backed_by: https://opplevagent.no/api/opplevelser/discover (operationId discoverExperiences)
+    input_modes: [text/plain, application/json]
+    output_modes: [application/json]
+    examples: 4
+  - id: opplevelser_info
+    name: Hent opplevelse / Get experience details
+    backed_by: GET /api/opplevelser/{id} (operationId getExperience)
+    input_modes: [application/json]
+    output_modes: [application/json]
+    examples: 2
+  - id: opplevelser_categories
+    name: Kategorier / List categories
+    backed_by: GET /api/opplevelser/categories (operationId listExperienceCategories)
+    input_modes: [text/plain, application/json]
+    output_modes: [application/json]
+    examples: 3
+  extensions:
+    endpoints:
+      rest: https://opplevagent.no/api/opplevelser
+      discover: https://opplevagent.no/api/opplevelser/discover
+      a2a: https://opplevagent.no/a2a
+      openapi: https://opplevagent.no/openapi.json
+      llms: https://opplevagent.no/llms.txt
+      provenancePage: https://opplevagent.no/proveniens
+    x-distribution:
+    - channel: custom-gpt
+      url: https://chatgpt.com/g/g-6a3ab590a7f081919c528a15c6765a7d-opplevagent-finn-opplevelser-i-norge
+      status: live
+  signatures:
+    count: 1
+    protected_header_decoded: '{"alg":"EdDSA","kid":"lokal-a2a-2026"}'
+    note: >-
+      The card carries a JWS signature block (EdDSA, kid lokal-a2a-2026) but publishes no jwks_uri or key
+      discovery location, so a verifier cannot resolve the key from the card alone. The kid prefix "lokal" is
+      the name of the operator's shared codebase (github.com/slookisen/lokal), which also powers rettfrabonden.com.
+conformance:
+  spec: A2A 1.0.0
+  grade: conformant
+  protocol_version: 1.0.0
+  preferred_transport: JSONRPC
+  hard_checks:
+    capabilities_is_object: true
+    protocol_version_present: true
+    skills_is_array: true
+  optional_fields:
+    preferred_transport: true
+    default_input_modes: true
+    default_output_modes: true
+  grade_basis: >-
+    Graded against the A2A 1.0.0 hard checks. capabilities is an OBJECT with streaming, pushNotifications and
+    stateTransitionHistory booleans (pass). protocolVersion "1.0.0" is present at the top level (pass). skills is an
+    ARRAY of three fully populated skills, each with id, name, description, inputModes, outputModes and examples
+    (pass). All three optional discriminators — preferredTransport, defaultInputModes, defaultOutputModes — are
+    present, so the card clears the near-conformant bar as well.
+  deviations:
+  - field: url / preferredTransport / protocolVersion / additionalInterfaces
+    observed: 0.3-era top-level layout while declaring protocolVersion 1.0.0
+    note: >-
+      A2A 1.0.0 moved the interface triple into supportedInterfaces[] with protocolBinding. This card declares
+      1.0.0 but keeps the 0.3-shaped top-level url + preferredTransport + additionalInterfaces. Readers written for
+      either shape will parse it; a strict 1.0.0 reader looking for supportedInterfaces finds none.
+  - field: authentication
+    observed: legacy {schemes:[none], credentials:null} block alongside securitySchemes
+    note: The pre-0.3 authentication object is retained for older clients; securitySchemes is the current form. Both say the same thing.
+  - field: securitySchemes without security
+    observed: consumerApiKey declared, no top-level security requirement
+    note: Consistent with the card's own text — the key is optional — but a reader cannot tell from structure alone that anonymous calls are accepted.
+  - field: endpoints / x-distribution
+    observed: non-standard extension objects
+    note: Useful discovery data (REST, OpenAPI, llms.txt, provenance page, a ChatGPT Custom GPT) carried outside the A2A vocabulary.
+  - field: signatures[].protected
+    observed: EdDSA JWS with kid but no published key location
+    note: Signature present but not verifiable from published material; see agent_card.signatures.
+surface_relationship:
+  note: >-
+    Opplevagent publishes three agent surfaces that are projections of ONE read-only discovery core plus one
+    write flow. A2A: three skills at https://opplevagent.no/a2a (message/send, with tasks/send kept as a pre-0.3
+    alias per llms.txt). MCP: five tools at https://opplevagent.no/mcp — the three discovery tools plus
+    discover_gardssalg and book_gardssalg (see mcp/opplevagent-no-mcp.yml). REST: seven operations in the OpenAPI,
+    three of which are the discovery core. The A2A card exposes only the experiences discovery skills, not the
+    gårdssalg producer vertical or the booking request flow.

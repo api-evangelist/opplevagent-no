@@ -1,0 +1,113 @@
+generated: '2026-09-19'
+method: searched
+source: https://opplevagent.no/llms.txt
+derived_from: openapi/opplevagent-no-openapi.yml
+docs:
+- https://opplevagent.no/llms.txt
+- https://opplevagent.no/guide-opplevelser-mcp
+base_url: https://opplevagent.no
+media_type: application/json
+auth:
+  style: anonymous by default; optional consumer API key
+  header: X-API-Key
+  required: false
+  obtain: POST https://opplevagent.no/api/keys (optional JSON body {label, contact_email}; no account or login)
+  revoke: POST https://opplevagent.no/api/keys/revoke
+  erase: POST https://opplevagent.no/api/keys/erase (GDPR erasure of label/e-mail)
+  effect: Raises the rate ceiling roughly 3x (200 -> 600 per window on /a2a and /mcp, 300 -> 900 on REST) and enables a per-key usage ledger (endpoint/tool name and date only).
+  detail: authentication/opplevagent-no-authentication.yml
+idempotency:
+  supported: false
+  coverage: none
+  mechanism: null
+  header: null
+  scope: []
+  description: >-
+    No Idempotency-Key header, replay key or duplicate-suppression window is documented on any write path. The
+    OpenAPI contract is entirely read-only; the write surface (book_gardssalg / POST /api/opplevelser/book, POST
+    /api/keys and its revoke/erase) is documented only in llms.txt and the MCP tool list. The MCP tool
+    book_gardssalg declares idempotentHint false, so a retried booking request may create a second pending request.
+  read_side: All discovery tools declare idempotentHint true and readOnlyHint true.
+dry_run_mode:
+  supported: false
+  note: >-
+    No dry-run flag. book_gardssalg's built-in checks (provider resolution, weekday mismatch, outside-hours) return
+    without creating a booking, and requested_weekday acts as a pre-commit safety check, but there is no way to
+    rehearse a successful booking without submitting it.
+reversibility:
+  status: documented
+  method: searched
+  docs:
+  - https://opplevagent.no/llms.txt
+  summary: >-
+    Two write surfaces, two different answers. The optional consumer key has an explicit, provider-documented reversal
+    pair (revoke, erase) that llms.txt says can be used "any time" — a stated, unbounded window, so that surface is
+    verified. The booking request has NO agent-side cancel: the request is pending until the PRODUCER confirms,
+    re-proposes or declines by e-mail, and the guest receives only a read-only status link. Overall grade is
+    documented because the higher-consequence surface (booking) has no API reversal path.
+  reversals:
+  - action: Issue a consumer API key
+    forward_operation: POST /api/keys (undeclared in the OpenAPI; documented in llms.txt)
+    reversal_operation: POST /api/keys/revoke
+    reversal_effect: Stops the key; history is retained.
+    secondary_reversal: POST /api/keys/erase — GDPR deletion of the label and contact e-mail.
+    window: 'any time'
+    window_stated: true
+    window_source: 'llms.txt: "send it back as the X-API-Key header on any call for a higher rate-limit tier, and revoke/erase it any time via POST /api/keys/revoke or POST /api/keys/erase."'
+    grade: verified
+  - action: Submit a gårdssalg booking request
+    forward_operation: MCP tool book_gardssalg / POST /api/opplevelser/book (undeclared in the OpenAPI)
+    reversal_operation: null
+    window: null
+    window_stated: false
+    note: >-
+      llms.txt: the tool "NEVER creates a confirmed booking — only the same pending row the web form produces";
+      the producer answers by e-mail and "no AI agent can confirm a booking on the guest's or producer's behalf".
+      No cancel operation is documented for the guest or the agent; the status link is read-only. No payment is
+      involved, so the financial exposure is nil, but the request itself cannot be withdrawn through the API.
+    grade: none
+  read_only_surface: The seven OpenAPI operations are all GET or query-shaped POST (A2A message/send) and need no reversal.
+pagination:
+  style: limit only, no cursor or offset
+  request:
+    fields:
+    - name: limit
+      type: integer
+      note: default 20, max 100 on REST; the MCP tool caps at 50
+  response:
+    fields: [vertical, query, count, total, results]
+    note: count is the number returned, total the number matching; there is no way to fetch the next page.
+filtering_and_sorting:
+  filters: [fylke, kommune, category, indoor_outdoor, weather, season, group_size, age, max_price, duration_max, language, lat, lng, radius_km]
+  gardssalg_only_filters: [producer_type, booking_live, q]
+  sort: 'sort=distance (only value; already the default when lat/lng are given)'
+  near_me: lat and lng must be sent together; radius_km applies only with them; rows without a geocoded location are excluded rather than given a fabricated distance.
+field_expansion: none
+sparse_fieldsets: none
+localisation:
+  languages: [nb, en]
+  note: Bilingual by design — results carry title and title_no; descriptions in the card, tools and llms.txt are Norwegian/English side by side. language= filters experiences offered in a given language.
+request_id_tracing:
+  header: fly-request-id
+  note: Emitted by the Fly.io edge on every response; no provider-level request id is documented.
+versioning:
+  scheme: unversioned
+  detail: lifecycle/opplevagent-no-lifecycle.yml
+errors:
+  envelope: '{"error": string, "details"?: [{code, path[], message}]}'
+  media_type: application/json
+  detail: errors/opplevagent-no-problem-types.yml
+rate_limit_signaling:
+  headers: [RateLimit-Policy, RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset]
+  observed: 'RateLimit-Policy: 300;w=900 on REST; 200;w=900 on /a2a and /mcp'
+  detail: rate-limits/opplevagent-no-rate-limits.yml
+mcp_session:
+  handshake: initialize first; capture mcp-session-id from the response headers; send it on every subsequent call.
+  failure: JSON-RPC -32000 "Server not initialized" (HTTP 400) when skipped.
+data_honesty_conventions:
+  note: >-
+    The provider states several conventions an agent should preserve when relaying results: geo_precision
+    "kommune" distances are approximate and must not be presented as exact; booking.live reflects dark-launch
+    status and never overclaims; only Brreg-verified providers are published; descriptions are fact summaries with
+    source attribution (https://opplevagent.no/proveniens).
+webhooks: none
