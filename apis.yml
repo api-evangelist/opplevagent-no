@@ -23,6 +23,19 @@ modified: '2026-09-19'
 tags:
 - Travel
 - Tourism
+- Experience
+- Activities
+- Norway
+- Marketplace
+- agent-native
+- A2A
+- MCP
+- Booking
+- Local Food
+- Open Data
+tags_raw:
+- Travel
+- Tourism
 - Experiences
 - Activities
 - Norway
@@ -44,6 +57,12 @@ apis:
   humanURL: https://opplevagent.no/llms.txt
   baseURL: https://opplevagent.no/api/opplevelser
   tags:
+  - Travel
+  - Tourism
+  - Experience
+  - Discovery
+  - Norway
+  tags_raw:
   - Travel
   - Tourism
   - Experiences
@@ -85,6 +104,11 @@ apis:
   tags:
   - MCP
   - agent-native
+  - Experience
+  - Booking
+  tags_raw:
+  - MCP
+  - agent-native
   - Experiences
   - Booking
   properties:
@@ -109,6 +133,11 @@ apis:
   humanURL: https://opplevagent.no/llms.txt
   baseURL: https://opplevagent.no/a2a
   tags:
+  - A2A
+  - agent-native
+  - Experience
+  - Norway
+  tags_raw:
   - A2A
   - agent-native
   - Experiences
