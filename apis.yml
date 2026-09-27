@@ -8,6 +8,22 @@ description: Opplevagent is an agent-native (A2A) marketplace of Norwegian exper
   tools including a pending-only booking request, and an A2A JSON-RPC endpoint described by a signed agent card
   at /.well-known/agent-card.json. No authentication is required; an optional free X-API-Key raises the rate limits.
   Operated from Norway by Daniel Fredriksen on the same codebase as the sibling sites rettfrabonden.com and finn-tannlege.com.
+deliveryModel:
+  model: saas
+  license_evidence:
+    not_product:
+    - slookisen/lokal
+  open_source: unknown
+  commercial: true
+  callable_host: true
+  label: Hosted service · you call their endpoint
+  confidence: low
+  source:
+  - openapi
+  - pricing
+  - repository-not-product
+  generated: '2026-09-25'
+  method: derived
 image: https://opplevagent.no/favicon.svg
 url: https://raw.githubusercontent.com/api-evangelist/opplevagent-no/refs/heads/main/apis.yml
 x-type: company
@@ -27,7 +43,7 @@ tags:
 - Activities
 - Norway
 - Marketplace
-- agent-native
+- Agent-Native
 - A2A
 - MCP
 - Booking
@@ -47,63 +63,20 @@ tags_raw:
 - Local Food
 - Open Data
 apis:
-- aid: opplevagent-no:discovery-api
-  name: Opplevagent Discovery API
-  description: 'Read-only REST discovery over verified Norwegian experiences and gårdssalg producers: intent discovery
-    with county, municipality, category, weather, season, indoor/outdoor, group size, age, price, duration, language
-    and near-me (lat/lng/radius) filters; a category list with live counts; and a single-experience lookup by UUID.
-    Anonymous, with IETF RateLimit headers on every response (300 requests per 900 s; 900 with the optional free
-    X-API-Key). The OpenAPI also declares the A2A card, the A2A JSON-RPC endpoint and llms.txt as operations.'
-  humanURL: https://opplevagent.no/llms.txt
-  baseURL: https://opplevagent.no/api/opplevelser
-  tags:
-  - Travel
-  - Tourism
-  - Experience
-  - Discovery
-  - Norway
-  tags_raw:
-  - Travel
-  - Tourism
-  - Experiences
-  - Discovery
-  - Norway
-  properties:
-  - type: OpenAPI
-    url: openapi/opplevagent-no-openapi.yml
-  - type: OpenAPI
-    name: OpenAPI (provider-hosted)
-    url: https://opplevagent.no/openapi.json
-  - type: Documentation
-    url: https://opplevagent.no/llms.txt
-  - type: APIReference
-    url: https://opplevagent.no/openapi.json
-  - type: Overlay
-    url: overlays/opplevagent-no-api-overlay.yaml
-  - type: ErrorCatalog
-    url: errors/opplevagent-no-problem-types.yml
-  - type: DataModel
-    url: data-model/opplevagent-no-data-model.yml
-  - type: RateLimits
-    url: rate-limits/opplevagent-no-rate-limits.yml
-  - type: Authentication
-    url: authentication/opplevagent-no-authentication.yml
-  image: https://opplevagent.no/favicon.svg
-  x-baseURL-basis: Agent card additionalInterfaces[0].url and endpoints.rest (HTTP+JSON interface); OpenAPI servers[]
-    stays https://opplevagent.no with /api/opplevelser/... paths.
 - aid: opplevagent-no:mcp-server
   name: Opplevagent MCP Server
-  description: Remote Model Context Protocol server over Streamable HTTP at https://opplevagent.no/mcp, anonymous
-    and session-based (initialize first, then echo mcp-session-id). A live tools/list returns five tools with input
-    schemas and annotations — discover_experiences, list_experience_categories, get_experience, discover_gardssalg
-    and the write tool book_gardssalg, which only ever creates a pending request the producer confirms by e-mail
-    — plus two ui:// resources. The same server ships as the opplevagent-mcp npm package (npx opplevagent-mcp) and
-    a server card is published at /.well-known/mcp/server-card.json.
+  description: >-
+    Remote Model Context Protocol server over Streamable HTTP at https://opplevagent.no/mcp, anonymous
+    and session-based (initialize first, then echo mcp-session-id). A live tools/list returns five tools
+    with input schemas and annotations — discover_experiences, list_experience_categories, get_experience,
+    discover_gardssalg and the write tool book_gardssalg, which only ever creates a pending request the
+    producer confirms by e-mail — plus two ui:// resources. The same server ships as the opplevagent-mcp
+    npm package (npx opplevagent-mcp) and a server card is published at /.well-known/mcp/server-card.json.
   humanURL: https://opplevagent.no/guide-opplevelser-mcp
   baseURL: https://opplevagent.no/mcp
   tags:
   - MCP
-  - agent-native
+  - Agent-Native
   - Experience
   - Booking
   tags_raw:
@@ -125,16 +98,17 @@ apis:
   image: https://opplevagent.no/favicon.svg
 - aid: opplevagent-no:a2a-agent
   name: Opplevagent A2A Agent
-  description: 'A2A JSON-RPC 2.0 endpoint at https://opplevagent.no/a2a described by a signed agent card (protocolVersion
-    1.0.0, JSONRPC transport, three skills: discover experiences, get experience details, list categories) at /.well-known/agent-card.json.
-    Accepts message/send (and tasks/send as a pre-0.3 alias) with natural-language text in Norwegian or English
-    or structured JSON filters, and returns a completed Task with a text summary and a data artifact. No streaming,
-    no push notifications, no authentication.'
+  description: >-
+    A2A JSON-RPC 2.0 endpoint at https://opplevagent.no/a2a described by a signed agent card (protocolVersion
+    1.0.0, JSONRPC transport, three skills: discover experiences, get experience details, list categories)
+    at /.well-known/agent-card.json. Accepts message/send (and tasks/send as a pre-0.3 alias) with natural-language
+    text in Norwegian or English or structured JSON filters, and returns a completed Task with a text
+    summary and a data artifact. No streaming, no push notifications, no authentication.
   humanURL: https://opplevagent.no/llms.txt
   baseURL: https://opplevagent.no/a2a
   tags:
   - A2A
-  - agent-native
+  - Agent-Native
   - Experience
   - Norway
   tags_raw:
@@ -151,6 +125,94 @@ apis:
   - type: Documentation
     url: https://opplevagent.no/llms.txt
   image: https://opplevagent.no/favicon.svg
+- aid: opplevagent-no:opplevagent-no-a2a-api
+  name: Opplevagent A2a API
+  description: The A2a API from Opplevagent — 1 operation(s) for a2a.
+  humanURL: https://opplevagent.no/llms.txt
+  baseURL: https://opplevagent.no/api/opplevelser
+  tags:
+  - A2a
+  properties:
+  - type: OpenAPI
+    url: openapi/opplevagent-no-a2a-api-openapi.yml
+  - type: Documentation
+    url: https://opplevagent.no/llms.txt
+  - type: APIReference
+    url: https://opplevagent.no/openapi.json
+  - type: ErrorCatalog
+    url: errors/opplevagent-no-problem-types.yml
+  - type: DataModel
+    url: data-model/opplevagent-no-data-model.yml
+  - type: RateLimits
+    url: rate-limits/opplevagent-no-rate-limits.yml
+  - type: Authentication
+    url: authentication/opplevagent-no-authentication.yml
+- aid: opplevagent-no:opplevagent-no-llms-txt-api
+  name: Opplevagent Llms.txt API
+  description: The Llms.txt API from Opplevagent — 1 operation(s) for llms.txt.
+  humanURL: https://opplevagent.no/llms.txt
+  baseURL: https://opplevagent.no/api/opplevelser
+  tags:
+  - Llms.txt
+  properties:
+  - type: OpenAPI
+    url: openapi/opplevagent-no-llms-txt-api-openapi.yml
+  - type: Documentation
+    url: https://opplevagent.no/llms.txt
+  - type: APIReference
+    url: https://opplevagent.no/openapi.json
+  - type: ErrorCatalog
+    url: errors/opplevagent-no-problem-types.yml
+  - type: DataModel
+    url: data-model/opplevagent-no-data-model.yml
+  - type: RateLimits
+    url: rate-limits/opplevagent-no-rate-limits.yml
+  - type: Authentication
+    url: authentication/opplevagent-no-authentication.yml
+- aid: opplevagent-no:opplevagent-no-opplevelser-api
+  name: Opplevagent Opplevelser API
+  description: The Opplevelser API from Opplevagent — 3 operation(s) for opplevelser.
+  humanURL: https://opplevagent.no/llms.txt
+  baseURL: https://opplevagent.no/api/opplevelser
+  tags:
+  - Opplevelser
+  properties:
+  - type: OpenAPI
+    url: openapi/opplevagent-no-opplevelser-api-openapi.yml
+  - type: Documentation
+    url: https://opplevagent.no/llms.txt
+  - type: APIReference
+    url: https://opplevagent.no/openapi.json
+  - type: ErrorCatalog
+    url: errors/opplevagent-no-problem-types.yml
+  - type: DataModel
+    url: data-model/opplevagent-no-data-model.yml
+  - type: RateLimits
+    url: rate-limits/opplevagent-no-rate-limits.yml
+  - type: Authentication
+    url: authentication/opplevagent-no-authentication.yml
+- aid: opplevagent-no:opplevagent-no-well-known-api
+  name: Opplevagent .well Known API
+  description: The .well Known API from Opplevagent — 1 operation(s) for .well known.
+  humanURL: https://opplevagent.no/llms.txt
+  baseURL: https://opplevagent.no/api/opplevelser
+  tags:
+  - .well Known
+  properties:
+  - type: OpenAPI
+    url: openapi/opplevagent-no-well-known-api-openapi.yml
+  - type: Documentation
+    url: https://opplevagent.no/llms.txt
+  - type: APIReference
+    url: https://opplevagent.no/openapi.json
+  - type: ErrorCatalog
+    url: errors/opplevagent-no-problem-types.yml
+  - type: DataModel
+    url: data-model/opplevagent-no-data-model.yml
+  - type: RateLimits
+    url: rate-limits/opplevagent-no-rate-limits.yml
+  - type: Authentication
+    url: authentication/opplevagent-no-authentication.yml
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
@@ -221,3 +283,10 @@ x-enrichment:
   status: enriched
   artifacts_added: 30
   pass: local-v3
+x-a2a:
+  verified: true
+  probed: '2026-09-26'
+  url: "https://opplevagent.no/.well-known/agent-card.json"
+  grade: "conformant"
+  protocol_version: "1.0.0"
+  control: 404

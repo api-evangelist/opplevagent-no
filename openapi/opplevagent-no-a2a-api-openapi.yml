@@ -1,0 +1,94 @@
+openapi: 3.2.0
+info:
+  title: Opplevagent No A2a API
+  version: 0.1.0
+  contact:
+    url: https://opplevagent.no
+  license:
+    name: CC0 (Brreg data)
+    url: https://creativecommons.org/publicdomain/zero/1.0/
+  description: 'Operations tagged A2a across 2 of this provider''s published API definitions: opplevagent-no-openapi.json, opplevagent-no-openapi.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://opplevagent.no
+  description: Production
+tags:
+- name: A2a
+paths:
+  /a2a:
+    get:
+      operationId: getExperiencesA2ACard
+      summary: A2A agent card (health check)
+      responses:
+        '200':
+          description: Agent card JSON
+          content:
+            application/json:
+              schema:
+                type: object
+      tags:
+      - A2a
+    post:
+      operationId: experiencesA2AJsonRpc
+      summary: A2A JSON-RPC 2.0 endpoint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - jsonrpc
+              - method
+              - id
+              properties:
+                jsonrpc:
+                  type: string
+                  enum:
+                  - '2.0'
+                method:
+                  type: string
+                  enum:
+                  - message/send
+                  - tasks/send
+                params:
+                  type: object
+                id:
+                  type:
+                  - string
+                  - number
+            examples:
+              discover:
+                summary: Discover experiences by county and weather
+                value:
+                  jsonrpc: '2.0'
+                  method: message/send
+                  params:
+                    message:
+                      text: hva kan vi finne på i Oslo når det regner
+                  id: '1'
+      responses:
+        '200':
+          description: JSON-RPC response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jsonrpc:
+                    type: string
+                  result:
+                    type: object
+                  error:
+                    type: object
+                  id:
+                    type:
+                    - string
+                    - number
+      tags:
+      - A2a
+    servers:
+    - url: https://opplevagent.no
+      description: Production
+x-refined-from:
+- opplevagent-no-openapi.json
+- opplevagent-no-openapi.yml

@@ -1,0 +1,35 @@
+openapi: 3.2.0
+info:
+  title: Opplevagent No .well Known API
+  version: 0.1.0
+  contact:
+    url: https://opplevagent.no
+  license:
+    name: CC0 (Brreg data)
+    url: https://creativecommons.org/publicdomain/zero/1.0/
+  description: 'Operations tagged .well Known across 2 of this provider''s published API definitions: opplevagent-no-openapi.json, opplevagent-no-openapi.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://opplevagent.no
+  description: Production
+tags:
+- name: .well Known
+paths:
+  /.well-known/agent-card.json:
+    get:
+      operationId: getExperiencesAgentCardWellKnown
+      summary: A2A Agent Card (well-known)
+      responses:
+        '200':
+          description: Agent card
+          content:
+            application/json:
+              schema:
+                type: object
+      tags:
+      - .well Known
+    servers:
+    - url: https://opplevagent.no
+      description: Production
+x-refined-from:
+- opplevagent-no-openapi.json
+- opplevagent-no-openapi.yml

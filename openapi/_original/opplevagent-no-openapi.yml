@@ -1,3 +1,5 @@
+# x-archived-from: opplevagent-no-openapi.yml
+# x-archived-on: 2026-09-26
 # Faithful YAML rendering of https://opplevagent.no/openapi.json fetched 2026-09-19 (HTTP 200, application/json, 11838 bytes).
 # Content is unchanged from openapi/_original/opplevagent-no-openapi.json; API Evangelist enhancements live in overlays/, never here.
 openapi: 3.1.0
