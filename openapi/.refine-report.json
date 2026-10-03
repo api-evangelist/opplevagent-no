@@ -1,8 +1,7 @@
 {
   "provider": "opplevagent-no",
   "sources": [
-    "_original/opplevagent-no-openapi.json",
-    "opplevagent-no-openapi.yml"
+    "_original/opplevagent-no-openapi.json"
   ],
   "outputs": [
     "opplevagent-no-well-known-api-openapi.yml",
@@ -10,12 +9,11 @@
     "opplevagent-no-llms-txt-api-openapi.yml",
     "opplevagent-no-opplevelser-api-openapi.yml"
   ],
-  "archived": [
-    "archived openapi/opplevagent-no-openapi.yml"
-  ],
+  "archived": [],
   "errors": [],
   "warnings": [],
   "notes": [
+    "1 archived document(s) dropped as subsets of other archived documents",
     "sourced from openapi/_original/ (1 archived document(s)); previously refined output at the top level was skipped rather than re-split",
     "opplevagent-no-openapi.json: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
     "opplevagent-no-openapi.json: tagged paths GET /api/opplevelser/discover -> Opplevelser",
@@ -29,23 +27,13 @@
     "opplevagent-no-openapi.json: declared missing tag: A2a",
     "opplevagent-no-openapi.json: declared missing tag: Llms.txt",
     "opplevagent-no-openapi.json: declared missing tag: Opplevelser",
-    "opplevagent-no-openapi.yml: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
-    "opplevagent-no-openapi.yml: tagged paths GET /api/opplevelser/discover -> Opplevelser",
-    "opplevagent-no-openapi.yml: tagged paths GET /api/opplevelser/categories -> Opplevelser",
-    "opplevagent-no-openapi.yml: tagged paths GET /api/opplevelser/{id} -> Opplevelser",
-    "opplevagent-no-openapi.yml: tagged paths GET /a2a -> A2a",
-    "opplevagent-no-openapi.yml: tagged paths POST /a2a -> A2a",
-    "opplevagent-no-openapi.yml: tagged paths GET /.well-known/agent-card.json -> .well Known",
-    "opplevagent-no-openapi.yml: tagged paths GET /llms.txt -> Llms.txt",
-    "opplevagent-no-openapi.yml: declared missing tag: .well Known",
-    "opplevagent-no-openapi.yml: declared missing tag: A2a",
-    "opplevagent-no-openapi.yml: declared missing tag: Llms.txt",
-    "opplevagent-no-openapi.yml: declared missing tag: Opplevelser",
-    "tag '.well Known' spans 2 source specs (opplevagent-no-openapi.json, opplevagent-no-openapi.yml): per-path servers applied",
-    "tag 'A2a' spans 2 source specs (opplevagent-no-openapi.json, opplevagent-no-openapi.yml): per-path servers applied",
-    "tag 'Llms.txt' spans 2 source specs (opplevagent-no-openapi.json, opplevagent-no-openapi.yml): per-path servers applied",
-    "tag 'Opplevelser' spans 2 source specs (opplevagent-no-openapi.json, opplevagent-no-openapi.yml): per-path servers applied",
-    "apis.yml register: written (+4 apis, 6 total)"
+    "apis.yml register: already-registered"
   ],
-  "skipped": []
+  "skipped": [
+    "_original/opplevagent-no-openapi.yml: archived document superseded by a larger archived document",
+    "opplevagent-no-a2a-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "opplevagent-no-llms-txt-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "opplevagent-no-opplevelser-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "opplevagent-no-well-known-api-openapi.yml: previously refined output, superseded by openapi/_original/"
+  ]
 }

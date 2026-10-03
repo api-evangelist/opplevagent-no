@@ -1,13 +1,13 @@
 openapi: 3.2.0
 info:
-  title: Opplevagent No Llms.txt API
+  title: Opplevagent Llms.txt API
+  description: REST API for Norwegian experience and activity discovery. Experiences are harvested from curated sources and provider-verified against Brønnøysundregistrene. All read endpoints are public; no authentication required.
   version: 0.1.0
   contact:
     url: https://opplevagent.no
   license:
     name: CC0 (Brreg data)
     url: https://creativecommons.org/publicdomain/zero/1.0/
-  description: 'Operations tagged Llms.txt across 2 of this provider''s published API definitions: opplevagent-no-openapi.json, opplevagent-no-openapi.yml. Each path carries the servers of the definition it was published in.'
 servers:
 - url: https://opplevagent.no
   description: Production
@@ -27,9 +27,3 @@ paths:
                 type: string
       tags:
       - Llms.txt
-    servers:
-    - url: https://opplevagent.no
-      description: Production
-x-refined-from:
-- opplevagent-no-openapi.json
-- opplevagent-no-openapi.yml
