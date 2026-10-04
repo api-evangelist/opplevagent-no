@@ -131,6 +131,8 @@ apis:
   humanURL: https://opplevagent.no/llms.txt
   baseURL: https://opplevagent.no/api/opplevelser
   tags:
+  - A2A
+  tags_raw:
   - A2a
   properties:
   - type: OpenAPI
@@ -153,6 +155,8 @@ apis:
   humanURL: https://opplevagent.no/llms.txt
   baseURL: https://opplevagent.no/api/opplevelser
   tags:
+  - llms-txt
+  tags_raw:
   - Llms.txt
   properties:
   - type: OpenAPI
