@@ -223,6 +223,8 @@ maintainers:
 - FN: APIs.json
   email: info@apis.io
 common:
+- type: Pricing
+  url: https://opplevagent.no/guide-opplevelser-mcp
 - type: AgenticAccess
   url: agentic-access/opplevagent-no-agentic-access.yml
 - type: Website
