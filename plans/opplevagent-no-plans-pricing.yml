@@ -25,3 +25,16 @@ plans:
     The keyed tier is a rate-limit tier, not a paid plan — the key is issued instantly by POST /api/keys with no
     identity check. There is no pricing page, no enterprise tier and no paid product; producers claim their profile
     for free (https://opplevagent.no/for-tilbydere). Booking is a request relayed to the producer with no payment.
+x-canonical:
+  generated: '2026-10-08'
+  vocabulary: all/0-working/economics/plans-canonical.yml
+  models:
+  - free
+  units: []
+  plans:
+  - name: Open access
+    access: other
+    model: free
+    model_how: derived
+    units: []
+    periods: []
