@@ -64,5 +64,128 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-Opplevagent is a company surfaced via the API Evangelist harvest backlog (source: a2a-registry) and added to the network as a stub for full-pipeline profiling.
-- https://opplevagent.no/
+Opplevagent is an agent-native (A2A) marketplace of Norwegian experiences and activities — 547 hand-picked tours, courses, attractions and things to do from 417 providers verified against Brønnøysundregistrene, plus a gårdssalg vertical of 252 farm-sale drink producers (breweries, cideries, wineries, distilleries). Agents and humans query the same catalog through an open, read-only REST discovery API described by an OpenAPI 3.1 document, a remote Streamable-HTTP MCP server (also shipped as the opplevagent-mcp npm package for stdio clients) with five tools including a pending-only booking request, and an A2A JSON-RPC endpoint described by a signed agent card at /.well-known/agent-card.json. No authentication is required; an optional free X-API-Key raises the rate limits. Operated from Norway by Daniel Fredriksen on the same codebase as the sibling sites rettfrabonden.com and finn-tannlege.com.
+
+**Areas:** Travel · Tourism · Experience · Activities · Norway · Marketplace · Agent-Native · A2A · MCP · Booking · Local Food · Open Data
+
+## Opplevagent on APIs.io
+
+Everything profiled for Opplevagent is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/opplevagent-no/](https://apis.io/providers/opplevagent-no/)** — or go straight to one of the APIs or properties below.
+
+### APIs (6)
+
+- [Opplevagent MCP Server](https://apis.io/apis/opplevagent-no/mcp-server/) — Remote Model Context Protocol server over Streamable HTTP at https://opplevagent.no/mcp, anonymous and session-based (initialize first, then echo…
+- [Opplevagent A2A Agent](https://apis.io/apis/opplevagent-no/a2a-agent/) — A2A JSON-RPC 2.0 endpoint at https://opplevagent.no/a2a described by a signed agent card (protocolVersion 1.0.0, JSONRPC transport, three skills: discover…
+- [Opplevagent A2a API](https://apis.io/apis/opplevagent-no/opplevagent-no-a2a-api/) — The A2a API from Opplevagent — 1 operation(s) for a2a.
+- [Opplevagent Llms.txt API](https://apis.io/apis/opplevagent-no/opplevagent-no-llms-txt-api/) — The Llms.txt API from Opplevagent — 1 operation(s) for llms.txt.
+- [Opplevagent Opplevelser API](https://apis.io/apis/opplevagent-no/opplevagent-no-opplevelser-api/) — The Opplevelser API from Opplevagent — 3 operation(s) for opplevelser.
+- [Opplevagent .well Known API](https://apis.io/apis/opplevagent-no/opplevagent-no-well-known-api/) — The .well Known API from Opplevagent — 1 operation(s) for .well known.
+
+### Published properties
+
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
+
+#### MCP servers (1)
+
+Model Context Protocol servers that expose the API to agents.
+
+- [opplevagent-no-mcp.yml](https://apis.io/servers/opplevagent-no/opplevagent-no-mcp-yml/)
+
+#### Agentic access (1)
+
+Which operations an agent can call, which act, and which need a human in the loop.
+
+- [Opplevagent No Agentic Access](https://apis.io/agentic-access/opplevagent-no/opplevagent-no-agentic-access/)
+
+#### Overlays (1)
+
+OpenAPI overlays, including conversational phrasing for each operation.
+
+- [Opplevagent No Api Overlay](https://apis.io/overlays/opplevagent-no/opplevagent-no-api-overlay/)
+
+#### Security (2)
+
+Authentication, trust centre, and vulnerability disclosure.
+
+- [Opplevagent No Authentication](https://apis.io/security/opplevagent-no/opplevagent-no-authentication/)
+- [Opplevagent No Domain Security](https://apis.io/security/opplevagent-no/opplevagent-no-domain-security/)
+
+#### Plans and pricing (1)
+
+Published plans, tiers and prices.
+
+- [Opplevagent No Plans Pricing](https://apis.io/plans/opplevagent-no/opplevagent-no-plans-pricing/)
+
+#### Rate limits (1)
+
+Published request limits.
+
+- [Opplevagent No Rate Limits](https://apis.io/rate-limits/opplevagent-no/opplevagent-no-rate-limits/)
+
+## Where to find this API
+
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
+
+- [Website](https://opplevagent.no/)
+- [Documentation](https://opplevagent.no/llms.txt)
+- [Getting started](https://opplevagent.no/guide-opplevelser-mcp)
+- [API reference](https://opplevagent.no/openapi.json)
+- [Pricing](https://opplevagent.no/guide-opplevelser-mcp)
+- [Support](https://opplevagent.no/kontakt)
+- [Terms of service](https://opplevagent.no/vilkar)
+- [Privacy policy](https://opplevagent.no/personvern)
+
+## API Evangelist rating
+
+**Kin Score 46.5** — developing · rubric 0.25.0 · scored 2026-10-23
+
+| Facet | Score |
+|---|---|
+| Discoverability | 75.0 |
+| Contract quality | 42.1 |
+| Contract governance | 18.2 |
+| Operational transparency | 36.8 |
+| Developer ergonomics | 47.0 |
+| Access clarity | 52.6 |
+
+**Agent readiness 38.8** — agent-ready (gated down from agent-native)
+
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | yes |
+| Agentic Access | derived (partial credit) |
+| Reversibility Documented | — |
+| MCP Server | documented (partial credit) |
+| Auth Clarity | bearer (partial credit) |
+| Idempotency | — |
+| Error Semantics | documented (partial credit) |
+| OpenAPI Examples | partial |
+| Rate Limit Signal | documented (partial credit) |
+| Event Surface Described | — |
+| Agent Skills | derived (partial credit) |
+| Well Known Catalog | — |
+| Consent Identity | — |
+| Agent Card | conformant |
+| Dry Run Mode | — |
+| Delegated Identity | — |
+| Protected Resource Metadata | — |
+| Dynamic Client Registration | — |
+| Agentic Commerce | — |
+| Pagination Ratio | paginated |
+| Operation Distinctiveness | distinct |
+
+**Regulatory alignment 28.4** — Government & Public Sector
+
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/opplevagent-no/](https://apis.io/providers/opplevagent-no/).
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for Opplevagent: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/opplevagent-no/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
